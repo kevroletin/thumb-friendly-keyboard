@@ -114,33 +114,55 @@ solve = let (connections, (_, verts, holes)) = runState body (0, [], [])
              (render_polyhedron verts connections)
              (render_holes holes)
   where
-    body = do s0 <- switch (vec 0  0  0    ) (vec 0 0 0)
-              s1 <- switch (vec 0  20 0    ) (vec 10 0 0)
-              s2 <- switch (vec 20 20 (-10)) (vec 10 0 0)
-              s3 <- switch (vec 20 0  (-10)) (vec (-10) 0 0)
-              return $ concat [
-                switch_top_bottom s0
-                , switch_top_bottom s1
-                , switch_top_bottom s2
-                , switch_top_bottom s3
-                , connect_left_to_right s1 s2
-                , connect_left_to_right s0 s3
-                , connect_near_to_far   s0 s1
-                , connect_near_to_far   s3 s2
-                , connect_middle s0 s1 s2 s3
-                , right_wall s2
-                , right_wall s3
-                , left_wall s0
-                , left_wall s1
-                , near_wall s0
-                , near_wall s3
-                , far_wall s1
-                , far_wall s2
-                , connect_right_wall_near_far s3 s2
-                , connect_left_wall_near_far s0 s1
-                , connect_near_wall_left_right s0 s3
-                , connect_far_wall_left_right s1 s2
-                ]
+    width = 6
+    height = 3
+    coords = [
+      [ switch (vec 0  0 0) (vec 0 0 0)
+      , switch (vec 15 0 0) (vec 0 0 0)
+      , switch (vec 30 0 0) (vec 0 0 0)
+      , switch (vec 45 0 0) (vec 0 0 0)
+      , switch (vec 60 0 0) (vec 0 0 0)
+      , switch (vec 75 0 0) (vec 0 0 0)
+      ],
+      [ switch (vec 0  15 0) (vec 0 0 0)
+      , switch (vec 15 15 0) (vec 0 0 0)
+      , switch (vec 30 15 0) (vec 0 0 0)
+      , switch (vec 45 15 0) (vec 0 0 0)
+      , switch (vec 60 15 0) (vec 0 0 0)
+      , switch (vec 75 15 0) (vec 0 0 0)
+      ],
+      [ switch (vec 0  30 0) (vec 0 0 0)
+      , switch (vec 15 30 0) (vec 0 0 0)
+      , switch (vec 30 30 0) (vec 0 0 0)
+      , switch (vec 45 30 0) (vec 0 0 0)
+      , switch (vec 60 30 0) (vec 0 0 0)
+      , switch (vec 75 30 0) (vec 0 0 0)
+      ]
+      ]
+    body = do sw <- sequence (fmap sequence coords)
+              let top_bottom = concat . concat $ map (map switch_top_bottom) sw
+              let near_far = concat [connect_near_to_far (sw !! y !! x) (sw !! (y + 1) !! x) |
+                                      y <- [0 .. (height - 2)],
+                                      x <- [0 .. (width - 1)]]
+              let left_right = concat [connect_left_to_right (sw !! y !! x) (sw !! y !! (x + 1)) |
+                                        y <- [0 .. (height - 1)],
+                                        x <- [0 .. (width - 2)]]
+              let middle = concat [connect_middle (sw !! y !! x) (sw !! (y + 1) !! x) (sw !! (y + 1) !! (x + 1)) (sw !! y !! (x + 1)) |
+                                    y <- [0 .. (height - 2)],
+                                    x <- [0 .. (width - 2)]]
+              let right = concat [right_wall (sw !! y            !! (width - 1))  | y <- [0 .. (height - 1)]]
+              let left  = concat [left_wall  (sw !! y            !! 0)            | y <- [0 .. (height - 1)]]
+              let far   = concat [far_wall   (sw !! (height - 1) !! x)            | x <- [0 .. (width - 1)]]
+              let near  = concat [near_wall  (sw !! 0            !! x)            | x <- [0 .. (width - 1)]]
+              let right' = concat [connect_right_wall_near_far (sw !! y !! (width - 1)) (sw !! (y + 1) !! (width - 1)) |
+                                    y <- [0 .. (height - 2)]]
+              let left'  = concat [connect_left_wall_near_far (sw !! y !! 0) (sw !! (y + 1) !! 0) |
+                                    y <- [0 .. (height - 2)]]
+              let near'  = concat [connect_near_wall_left_right (sw !! 0 !! x) (sw !! 0 !! (x + 1)) |
+                                    x <- [0 .. (width - 2)]]
+              let far'  = concat [connect_far_wall_left_right (sw !! (height - 1) !! x) (sw !! (height - 1) !! (x + 1)) |
+                                   x <- [0 .. (width - 2)]]
+              return $ top_bottom ++ near_far ++ left_right ++ middle ++ right ++ right' ++ left ++ left' ++ far ++ far' ++ near ++ near'
 
 main :: IO ()
 main = withFile "result.scad" WriteMode $ \h ->
