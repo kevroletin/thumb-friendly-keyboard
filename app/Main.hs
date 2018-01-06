@@ -36,9 +36,6 @@ keycap_elevation = 6
 -- Main idea here is to defined set of vertexes for polyhedron and then
 -- reference vertexes using indexes. All data about socket is stored in state
 -- and socket contains indexes which point to state.
---
---
---          Next unused index --.
 switch :: Vec -> Vec -> State (Int, [Vec], [(Vec, Vec)]) Switch
 switch centerPos (Vec ax ay az) = do
   (lastIdx, vertexes, holes) <- get
