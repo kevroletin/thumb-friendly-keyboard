@@ -51,9 +51,9 @@ switch centerPos (Vec ax ay az) = do
     b3 = move $ vec hw    (-hw) (-hh)
     hole = (centerPos, Vec ax ay az)
 
-vec_to_scad (Vec x y z) = "[" ++ (show x) ++ ", " ++ (show y) ++ ", " ++ (show z) ++ "]"
+render_vec (Vec x y z) = "[" ++ (show x) ++ ", " ++ (show y) ++ ", " ++ (show z) ++ "]"
 
-switch_to_scad sw = sandwich $ verts sw [0, 1, 2, 3]
+switch_top_bottom sw = sandwich $ verts sw [0, 1, 2, 3]
 
 top_to_bottom = (+ 4)
 sandwich xs = [xs, reverse $ map top_to_bottom xs]
@@ -86,14 +86,14 @@ connect_far_wall_left_right l r = [[t1 r, t2 l, b2 l, b1 r]]
 render_polyhedron verts connections = [
   "polyhedron("
   , "points=["
-  , intercalate ",\n" (fmap vec_to_scad verts)
+  , intercalate ",\n" (fmap render_vec verts)
   , "],"
   , "faces=["
   , intercalate ",\n" (fmap show connections)
   , "]);"
   ]
 
-hole_to_scad (Vec x y z, Vec ax ay az) = [
+render_cube (Vec x y z, Vec ax ay az) = [
   "translate(" ++ show [x, y, z] ++ ")"
   , "rotate(" ++ show [ax, ay, az] ++ ")"
   , "translate(" ++ show [-hw, -hw, -hh] ++ ")"
@@ -103,7 +103,7 @@ hole_to_scad (Vec x y z, Vec ax ay az) = [
     hw = hole_width / 2
     hh = hole_height / 2
 
-render_holes holes = concat (map hole_to_scad holes)
+render_holes holes = concat (map render_cube holes)
 
 render_difference xs ys =
   "difference() {" : xs ++ ys ++ ["};"]
@@ -119,10 +119,10 @@ solve = let (connections, (_, verts, holes)) = runState body (0, [], [])
               s2 <- switch (vec 20 20 (-10)) (vec 10 0 0)
               s3 <- switch (vec 20 0  (-10)) (vec (-10) 0 0)
               return $ concat [
-                switch_to_scad s0
-                , switch_to_scad s1
-                , switch_to_scad s2
-                , switch_to_scad s3
+                switch_top_bottom s0
+                , switch_top_bottom s1
+                , switch_top_bottom s2
+                , switch_top_bottom s3
                 , connect_left_to_right s1 s2
                 , connect_left_to_right s0 s3
                 , connect_near_to_far   s0 s1
