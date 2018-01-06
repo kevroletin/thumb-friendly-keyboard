@@ -21,10 +21,14 @@ b3 (Switch idx) = idx + 7
 vert (Switch idx) n = idx + n
 verts sw xs = map (vert sw) xs
 
-switch_width = 10
+switch_width = 19.05
 switch_height = 5
-hole_width = 8
+hole_width = 14
 hole_height = 12
+keycap_bottom_width = 19.05
+keycap_top_width = 14
+keycap_height = 10
+keycap_elevation = 6
 
 switch :: Vec -> Vec -> State (Int, [Vec], [(Vec, Vec)]) Switch
 switch centerPos (Vec ax ay az) = do
@@ -103,40 +107,68 @@ render_cube (Vec x y z, Vec ax ay az) = [
     hw = hole_width / 2
     hh = hole_height / 2
 
+render_keycap (Vec x y z, Vec ax ay az) = [
+  "translate(" ++ show [x, y, z] ++ ")"
+  , "rotate(" ++ show [ax, ay, az] ++ ")"
+  , "hull() {"
+  , "  translate(" ++ show [-hbw, -hbw, keycap_elevation] ++ ")"
+  , "    cube(" ++ show [keycap_bottom_width, keycap_bottom_width, 1] ++ ");"
+  , "  translate(" ++ show [-htw, -htw, (keycap_elevation + keycap_height)] ++ ")"
+  , "    cube(" ++ show [keycap_top_width, keycap_top_width, 1] ++ ");"
+  , "};"
+  ]
+  where
+    hbw = keycap_bottom_width / 2
+    htw = keycap_top_width / 2
+
+
+-- keycap_bottom_width = 19.05
+-- keycap_top_width = 14
+-- keycap_width = 10
+-- keycap_elevation = 6
+
 render_holes holes = concat (map render_cube holes)
+
+render_keycaps holes = concat (map render_keycap holes)
 
 render_difference xs ys =
   "difference() {" : xs ++ ys ++ ["};"]
 
+render_union xs ys =
+  "union() {" : xs ++ ys ++ ["};"]
+
 solve :: [String]
 solve = let (connections, (_, verts, holes)) = runState body (0, [], [])
         in render_difference
-             (render_polyhedron verts connections)
+             -- (render_polyhedron verts connections)
+             (render_union
+              (render_keycaps holes)
+              (render_polyhedron verts connections))
              (render_holes holes)
   where
     width = 6
     height = 3
     coords = [
-      [ switch (vec 0  0 0) (vec 0 0 0)
-      , switch (vec 15 0 0) (vec 0 0 0)
-      , switch (vec 30 0 0) (vec 0 0 0)
-      , switch (vec 45 0 0) (vec 0 0 0)
-      , switch (vec 60 0 0) (vec 0 0 0)
-      , switch (vec 75 0 0) (vec 0 0 0)
+      [ switch (vec 0  0 3) (vec (-10) 0 0)
+      , switch (vec 22 0 3) (vec (-10) 0 0)
+      , switch (vec 44 0 3) (vec (-10) 0 0)
+      , switch (vec 66 0 3) (vec (-10) 0 0)
+      , switch (vec 88 0 3) (vec (-10) 0 0)
+      , switch (vec 110 0 3) (vec (-10) 0 0)
       ],
-      [ switch (vec 0  15 0) (vec 0 0 0)
-      , switch (vec 15 15 0) (vec 0 0 0)
-      , switch (vec 30 15 0) (vec 0 0 0)
-      , switch (vec 45 15 0) (vec 0 0 0)
-      , switch (vec 60 15 0) (vec 0 0 0)
-      , switch (vec 75 15 0) (vec 0 0 0)
+      [ switch (vec 0  24 0) (vec (0) 0 0)
+      , switch (vec 22 24 0) (vec (0) 0 0)
+      , switch (vec 44 24 0) (vec (0) 0 0)
+      , switch (vec 66 24 0) (vec (0) 0 0)
+      , switch (vec 88 24 0) (vec (0) 0 (0))
+      , switch (vec 110 24 0) (vec (0) 0 (0))
       ],
-      [ switch (vec 0  30 0) (vec 0 0 0)
-      , switch (vec 15 30 0) (vec 0 0 0)
-      , switch (vec 30 30 0) (vec 0 0 0)
-      , switch (vec 45 30 0) (vec 0 0 0)
-      , switch (vec 60 30 0) (vec 0 0 0)
-      , switch (vec 75 30 0) (vec 0 0 0)
+      [ switch (vec 0  48 3) (vec (10) 0 0)
+      , switch (vec 22 48 3) (vec (10) 0 0)
+      , switch (vec 44 48 3) (vec (10) 0 0)
+      , switch (vec 66 48 3) (vec (10) 0 0)
+      , switch (vec 88 48 3) (vec (10) 0 (0))
+      , switch (vec 110 48 3) (vec (10) 0 (0))
       ]
       ]
     body = do sw <- sequence (fmap sequence coords)
