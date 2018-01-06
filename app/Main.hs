@@ -4,30 +4,37 @@ import Lib
 import System.IO
 import Data.Glome.Vec
 import Data.List
+import Control.Monad.State
 
 test = xfm_point (rotate (vec 1 0 0) (deg 90)) (vec 0 1 0)
 
-data Switch = Switch {
-  t0 :: Vec
-  , t1 :: Vec
-  , t2 :: Vec
-  , t3 :: Vec
-  , b0 :: Vec
-  , b1 :: Vec
-  , b2 :: Vec
-  , b3 :: Vec
-  } deriving Show
+data Switch = Switch Vec Vec Vec Vec Vec Vec Vec Vec deriving Show
 
-switch centerPos ax ay az = Switch {
-      t0 = move $ vec (-hw) (-hw) hh
-    , t1 = move $ vec (-hw) hw    hh
-    , t2 = move $ vec hw    hw    hh
-    , t3 = move $ vec hw    (-hw) hh
-    , b0 = move $ vec (-hw) (-hw) (-hh)
-    , b1 = move $ vec (-hw) hw    (-hh)
-    , b2 = move $ vec hw    hw    (-hh)
-    , b3 = move $ vec hw    (-hw) (-hh)
-    }
+type Switch' = Int
+
+-- t0' idx = idx
+-- t1 (Switch' idx) = idx + 1
+-- t2 (Switch' idx) = idx + 2
+-- t3 (Switch' idx) = idx + 3
+-- b0 (Switch' idx) = idx + 4
+-- b1 (Switch' idx) = idx + 5
+-- b2 (Switch' idx) = idx + 6
+-- b3 (Switch' idx) = idx + 7
+
+-- switch' :: State (Int, [Vec]) Switch'
+-- switch' = do (lastIdx, vertexes) <- get
+--              put (lastIdx + 8, vertexes ++ [t0, t1, t2, t3, b0, t1, b2, b3])
+--              return lastIdx
+
+switch centerPos ax ay az = (Switch
+     (move $ vec (-hw) (-hw) hh)
+     (move $ vec (-hw) hw    hh)
+     (move $ vec hw    hw    hh)
+     (move $ vec hw    (-hw) hh)
+     (move $ vec (-hw) (-hw) (-hh))
+     (move $ vec (-hw) hw    (-hh))
+     (move $ vec hw    hw    (-hh))
+     (move $ vec hw    (-hw) (-hh)))
   where
     rotation = compose [rotate (vec 1 0 0) (deg ax)
                        , rotate (vec 0 1 0) (deg ay)
