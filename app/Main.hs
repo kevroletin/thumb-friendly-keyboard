@@ -8,24 +8,24 @@ import Control.Monad.State
 
 test = xfm_point (rotate (vec 1 0 0) (deg 90)) (vec 0 1 0)
 
-data Switch' = Switch' Int deriving Show
+data Switch = Switch Int deriving Show
 
-t0 (Switch' idx) = idx
-t1 (Switch' idx) = idx + 1
-t2 (Switch' idx) = idx + 2
-t3 (Switch' idx) = idx + 3
-b0 (Switch' idx) = idx + 4
-b1 (Switch' idx) = idx + 5
-b2 (Switch' idx) = idx + 6
-b3 (Switch' idx) = idx + 7
-vert (Switch' idx) n = idx + n
+t0 (Switch idx) = idx
+t1 (Switch idx) = idx + 1
+t2 (Switch idx) = idx + 2
+t3 (Switch idx) = idx + 3
+b0 (Switch idx) = idx + 4
+b1 (Switch idx) = idx + 5
+b2 (Switch idx) = idx + 6
+b3 (Switch idx) = idx + 7
+vert (Switch idx) n = idx + n
 verts sw xs = map (vert sw) xs
 
-switch' :: Vec -> Vec -> State (Int, [Vec], [(Vec, Vec)]) Switch'
-switch' centerPos (Vec ax ay az) = do
+switch :: Vec -> Vec -> State (Int, [Vec], [(Vec, Vec)]) Switch
+switch centerPos (Vec ax ay az) = do
   (lastIdx, vertexes, holes) <- get
   put (lastIdx + 8, vertexes ++ [t0, t1, t2, t3, b0, b1, b2, b3], holes)
-  return (Switch' lastIdx)
+  return (Switch lastIdx)
   where
     rotation = compose [rotate (vec 1 0 0) (deg ax)
                        , rotate (vec 0 1 0) (deg ay)
@@ -98,10 +98,10 @@ solve = let (connections, (_, verts, holes)) = runState body (0, [], [])
            , "]);"
            ]
   where
-    body = do s0 <- switch' (vec 0  0  0    ) (vec 0 0 0)
-              s1 <- switch' (vec 0  20 0    ) (vec 10 0 0)
-              s2 <- switch' (vec 20 20 (-10)) (vec 10 0 0)
-              s3 <- switch' (vec 20 0  (-10)) (vec (-10) 0 0)
+    body = do s0 <- switch (vec 0  0  0    ) (vec 0 0 0)
+              s1 <- switch (vec 0  20 0    ) (vec 10 0 0)
+              s2 <- switch (vec 20 20 (-10)) (vec 10 0 0)
+              s3 <- switch (vec 20 0  (-10)) (vec (-10) 0 0)
               return $ concat [
                 switch_to_scad s0
                 , switch_to_scad s1
