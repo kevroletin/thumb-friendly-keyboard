@@ -8,8 +8,6 @@ import Control.Monad.State
 
 test = xfm_point (rotate (vec 1 0 0) (deg 90)) (vec 0 1 0)
 
-data Switch = Switch Vec Vec Vec Vec Vec Vec Vec Vec deriving Show
-
 data Switch' = Switch' Int deriving Show
 
 t0 (Switch' idx) = idx
@@ -23,10 +21,11 @@ b3 (Switch' idx) = idx + 7
 vert (Switch' idx) n = idx + n
 verts sw xs = map (vert sw) xs
 
-switch' :: Vec -> Vec -> State (Int, [Vec]) Switch'
-switch' centerPos (Vec ax ay az) = do (lastIdx, vertexes) <- get
-                                      put (lastIdx + 8, vertexes ++ [t0, t1, t2, t3, b0, b1, b2, b3])
-                                      return (Switch' lastIdx)
+switch' :: Vec -> Vec -> State (Int, [Vec], [(Vec, Vec)]) Switch'
+switch' centerPos (Vec ax ay az) = do
+  (lastIdx, vertexes, holes) <- get
+  put (lastIdx + 8, vertexes ++ [t0, t1, t2, t3, b0, b1, b2, b3], holes)
+  return (Switch' lastIdx)
   where
     rotation = compose [rotate (vec 1 0 0) (deg ax)
                        , rotate (vec 0 1 0) (deg ay)
@@ -46,27 +45,6 @@ switch' centerPos (Vec ax ay az) = do (lastIdx, vertexes) <- get
     b1 = move $ vec (-hw) hw    (-hh)
     b2 = move $ vec hw    hw    (-hh)
     b3 = move $ vec hw    (-hw) (-hh)
-
-switch centerPos ax ay az = (Switch
-     (move $ vec (-hw) (-hw) hh)
-     (move $ vec (-hw) hw    hh)
-     (move $ vec hw    hw    hh)
-     (move $ vec hw    (-hw) hh)
-     (move $ vec (-hw) (-hw) (-hh))
-     (move $ vec (-hw) hw    (-hh))
-     (move $ vec hw    hw    (-hh))
-     (move $ vec hw    (-hw) (-hh)))
-  where
-    rotation = compose [rotate (vec 1 0 0) (deg ax)
-                       , rotate (vec 0 1 0) (deg ay)
-                       , rotate (vec 0 0 1) (deg az)]
-    move = xfm_point (xfm_mult rotation (translate centerPos))
-    w   = 10
-    hw  = w/2
-    wi  = 8
-    hwi = wi/2
-    h   = 5
-    hh  = h/2
 
 vec_to_scad (Vec x y z) = "[" ++ (show x) ++ ", " ++ (show y) ++ ", " ++ (show z) ++ "]"
 
@@ -93,32 +71,24 @@ connect_near_to_far n f = sandwich [t1 n, t0 f, t3 f, t2 n]
 
 connect_middle s0 s1 s2 s3 = sandwich [t2 s0, t3 s1, t0 s2, t1 s3]
 
-right_wall (Switch t0 t1 t2 t3 b0 b1 b2 b3) =
-  (connect_by_square t3 t2 b2 b3)
+right_wall sw = [verts sw [3, 2, 6, 7]]
 
-left_wall (Switch t0 t1 t2 t3 b0 b1 b2 b3) =
-  (connect_by_square t1 t0 b0 b1)
+left_wall sw = [verts sw [4, 5, 1, 0]]
 
-near_wall (Switch t0 t1 t2 t3 b0 b1 b2 b3) =
-  (connect_by_square t0 t3 b3 b0)
+near_wall sw = [verts sw [0, 3, 7, 4]]
 
-far_wall (Switch t0 t1 t2 t3 b0 b1 b2 b3) =
-  (connect_by_square t1 t2 b2 b1)
+far_wall sw = [verts sw [2, 1, 5, 6]]
 
-connect_right_wall_near_far (Switch t0 t1 t2 t3 b0 b1 b2 b3) (Switch t0' t1' t2' t3' b0' b1' b2' b3') =
-  (connect_by_square t2 t3' b3' b2)
+connect_right_wall_near_far n f = [[t2 n, t3 f, b3 f, b2 n]]
 
-connect_left_wall_near_far (Switch t0 t1 t2 t3 b0 b1 b2 b3) (Switch t0' t1' t2' t3' b0' b1' b2' b3') =
-  (connect_by_square t0' t1 b1 b0')
+connect_left_wall_near_far n f = [[t0 f, t1 n, b1 n, b0 f]]
 
-connect_near_wall_left_right (Switch t0 t1 t2 t3 b0 b1 b2 b3) (Switch t0' t1' t2' t3' b0' b1' b2' b3') =
-  (connect_by_square t3 t0' b0' b3)
+connect_near_wall_left_right l r = [[t3 l, t0 r, b0 r, b3 l]]
 
-connect_far_wall_left_right (Switch t0 t1 t2 t3 b0 b1 b2 b3) (Switch t0' t1' t2' t3' b0' b1' b2' b3') =
-  (connect_by_square t1' t2 b2 b1')
+connect_far_wall_left_right l r = [[t1 r, t2 l, b2 l, b1 r]]
 
 solve :: [String]
-solve = let (connections, (_, verts)) = runState body (0, [])
+solve = let (connections, (_, verts, holes)) = runState body (0, [], [])
         in ["polyhedron("
            , "points=["
            , intercalate ",\n" (fmap vec_to_scad verts)
@@ -142,23 +112,19 @@ solve = let (connections, (_, verts)) = runState body (0, [])
                 , connect_near_to_far   s0 s1
                 , connect_near_to_far   s3 s2
                 , connect_middle s0 s1 s2 s3
+                , right_wall s2
+                , right_wall s3
+                , left_wall s0
+                , left_wall s1
+                , near_wall s0
+                , near_wall s3
+                , far_wall s1
+                , far_wall s2
+                , connect_right_wall_near_far s3 s2
+                , connect_left_wall_near_far s0 s1
+                , connect_near_wall_left_right s0 s3
+                , connect_far_wall_left_right s1 s2
                 ]
--- solve' :: [String]
--- solve' = concat [
---   , right_wall s2
---   , right_wall s3
---   , left_wall s0
---   , left_wall s1
---   , near_wall s0
---   , near_wall s3
---   , far_wall s1
---   , far_wall s2
---   , connect_right_wall_near_far s3 s2
---   , connect_left_wall_near_far s0 s1
---   , connect_near_wall_left_right s0 s3
---   , connect_far_wall_left_right s1 s2
---   ]
---   where
 
 main :: IO ()
 main = withFile "result.scad" WriteMode $ \h ->
