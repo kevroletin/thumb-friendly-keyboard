@@ -8,6 +8,9 @@ import Control.Monad.State
 
 test = xfm_point (rotate (vec 1 0 0) (deg 90)) (vec 0 1 0)
 
+-- we assume next view location:
+-- + x goes from left to right
+-- + y goes from "near" to "far"
 data Switch = Switch Int deriving Show
 
 t0 (Switch idx) = idx
@@ -30,6 +33,9 @@ keycap_top_width = 14
 keycap_height = 10
 keycap_elevation = 6
 
+-- Main idea here is to defined set of vertexes for polyhedron and then
+-- reference vertexes using indexes. All data about socket is stored in state
+-- and socket contains indexes which point to state.
 switch :: Vec -> Vec -> State (Int, [Vec], [(Vec, Vec)]) Switch
 switch centerPos (Vec ax ay az) = do
   (lastIdx, vertexes, holes) <- get
@@ -62,9 +68,6 @@ switch_top_bottom sw = sandwich $ verts sw [0, 1, 2, 3]
 top_to_bottom = (+ 4)
 sandwich xs = [xs, reverse $ map top_to_bottom xs]
 
--- we assume next view location:
--- + x goes from left to right
--- + y goes from "near" to "far"
 connect_left_to_right l r = sandwich [t1 r, t0 r, t3 l, t2 l]
 
 connect_near_to_far n f = sandwich [t1 n, t0 f, t3 f, t2 n]
@@ -121,12 +124,6 @@ render_keycap (Vec x y z, Vec ax ay az) = [
     hbw = keycap_bottom_width / 2
     htw = keycap_top_width / 2
 
-
--- keycap_bottom_width = 19.05
--- keycap_top_width = 14
--- keycap_width = 10
--- keycap_elevation = 6
-
 render_holes holes = concat (map render_cube holes)
 
 render_keycaps holes = concat (map render_keycap holes)
@@ -137,38 +134,40 @@ render_difference xs ys =
 render_union xs ys =
   "union() {" : xs ++ ys ++ ["};"]
 
+color c xs = "color(" : [show c] ++ [") {"] ++ xs ++ ["}"]
+
 solve :: [String]
 solve = let (connections, (_, verts, holes)) = runState body (0, [], [])
         in render_difference
              -- (render_polyhedron verts connections)
              (render_union
-              (render_keycaps holes)
-              (render_polyhedron verts connections))
+              (color [1, 1, 1] $ render_keycaps holes)
+              (color [0.8, 0.8, 0.8] $ render_polyhedron verts connections))
              (render_holes holes)
   where
     width = 6
     height = 3
     coords = [
-      [ switch (vec 0  0 3) (vec (-10) 0 0)
-      , switch (vec 22 0 3) (vec (-10) 0 0)
-      , switch (vec 44 0 3) (vec (-10) 0 0)
-      , switch (vec 66 0 3) (vec (-10) 0 0)
-      , switch (vec 88 0 3) (vec (-10) 0 0)
-      , switch (vec 110 0 3) (vec (-10) 0 0)
+      [ switch (vec 0  2 5) (vec (-10) 10 5)
+      , switch (vec 22 4 3) (vec (-10) 0 5)
+      , switch (vec 44 4 3) (vec (-10) 0 0)
+      , switch (vec 66 6 3) (vec (-10) 0 0)
+      , switch (vec 90 0 5) (vec (-10) (-10) (-15))
+      , switch (vec 111 (-4) 11) (vec (-10) (-20) (-15))
       ],
-      [ switch (vec 0  24 0) (vec (0) 0 0)
-      , switch (vec 22 24 0) (vec (0) 0 0)
-      , switch (vec 44 24 0) (vec (0) 0 0)
-      , switch (vec 66 24 0) (vec (0) 0 0)
-      , switch (vec 88 24 0) (vec (0) 0 (0))
-      , switch (vec 110 24 0) (vec (0) 0 (0))
+      [ switch (vec 0  23 2) (vec (0) 10 5)
+      , switch (vec 22 25 0) (vec (0) 0 5)
+      , switch (vec 44 28 0) (vec (0) 0 0)
+      , switch (vec 66 30 0) (vec (0) 0 0)
+      , switch (vec 90 22 2) (vec (0) (-10) (-15))
+      , switch (vec 111 18 09) (vec (0) (-20) (-15))
       ],
-      [ switch (vec 0  48 3) (vec (10) 0 0)
-      , switch (vec 22 48 3) (vec (10) 0 0)
-      , switch (vec 44 48 3) (vec (10) 0 0)
-      , switch (vec 66 48 3) (vec (10) 0 0)
-      , switch (vec 88 48 3) (vec (10) 0 (0))
-      , switch (vec 110 48 3) (vec (10) 0 (0))
+      [ switch (vec 0  44 5) (vec (10) 10 5)
+      , switch (vec 22 46 3) (vec (10) 0 5)
+      , switch (vec 44 52 3) (vec (10) 0 0)
+      , switch (vec 66 54 3) (vec (10) 0 0)
+      , switch (vec 90 44 5) (vec (10) (-10) (-15))
+      , switch (vec 111 40 12) (vec (15) (-23) (-15))
       ]
       ]
     body = do sw <- sequence (fmap sequence coords)
