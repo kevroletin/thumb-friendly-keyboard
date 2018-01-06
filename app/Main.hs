@@ -36,6 +36,9 @@ keycap_elevation = 6
 -- Main idea here is to defined set of vertexes for polyhedron and then
 -- reference vertexes using indexes. All data about socket is stored in state
 -- and socket contains indexes which point to state.
+--
+--
+--          Next unused index --.
 switch :: Vec -> Vec -> State (Int, [Vec], [(Vec, Vec)]) Switch
 switch centerPos (Vec ax ay az) = do
   (lastIdx, vertexes, holes) <- get
@@ -136,40 +139,16 @@ render_union xs ys =
 
 color c xs = "color(" : [show c] ++ [") {"] ++ xs ++ ["}"]
 
-solve :: [String]
-solve = let (connections, (_, verts, holes)) = runState body (0, [], [])
+render coords withKeycaps = let (connections, (_, verts, holes)) = runState body (0, [], [])
         in render_difference
-             -- (render_polyhedron verts connections)
-             (render_union
-              (color [1, 1, 1] $ render_keycaps holes)
-              (color [0.8, 0.8, 0.8] $ render_polyhedron verts connections))
+             (if not withKeycaps then render_polyhedron verts connections
+              else render_union
+                     (color [1, 1, 1] $ render_keycaps holes)
+                     (color [0.8, 0.8, 0.8] $ render_polyhedron verts connections))
              (render_holes holes)
   where
-    width = 6
-    height = 3
-    coords = [
-      [ switch (vec 0  2 5) (vec (-10) 10 5)
-      , switch (vec 22 4 3) (vec (-10) 0 5)
-      , switch (vec 44 4 3) (vec (-10) 0 0)
-      , switch (vec 66 6 3) (vec (-10) 0 0)
-      , switch (vec 90 0 5) (vec (-10) (-10) (-15))
-      , switch (vec 111 (-4) 11) (vec (-10) (-20) (-15))
-      ],
-      [ switch (vec 0  23 2) (vec (0) 10 5)
-      , switch (vec 22 25 0) (vec (0) 0 5)
-      , switch (vec 44 28 0) (vec (0) 0 0)
-      , switch (vec 66 30 0) (vec (0) 0 0)
-      , switch (vec 90 22 2) (vec (0) (-10) (-15))
-      , switch (vec 111 18 09) (vec (0) (-20) (-15))
-      ],
-      [ switch (vec 0  44 5) (vec (10) 10 5)
-      , switch (vec 22 46 3) (vec (10) 0 5)
-      , switch (vec 44 52 3) (vec (10) 0 0)
-      , switch (vec 66 54 3) (vec (10) 0 0)
-      , switch (vec 90 44 5) (vec (10) (-10) (-15))
-      , switch (vec 111 40 12) (vec (15) (-23) (-15))
-      ]
-      ]
+    width = length (head coords)
+    height = length coords
     body = do sw <- sequence (fmap sequence coords)
               let top_bottom = concat . concat $ map (map switch_top_bottom) sw
               let near_far = concat [connect_near_to_far (sw !! y !! x) (sw !! (y + 1) !! x) |
@@ -195,6 +174,47 @@ solve = let (connections, (_, verts, holes)) = runState body (0, [], [])
                                    x <- [0 .. (width - 2)]]
               return $ top_bottom ++ near_far ++ left_right ++ middle ++ right ++ right' ++ left ++ left' ++ far ++ far' ++ near ++ near'
 
+mainPlate = [
+  [ switch (vec 0  (0) 7) (vec (-25) 10 5)
+  , switch (vec 22 (2) 4) (vec (-25) 0 5)
+  , switch (vec 44 (2) 4) (vec (-25) 0 0)
+  , switch (vec 66 (4) 4) (vec (-25) 0 0)
+  , switch (vec 90 (-2) 6) (vec (-25) (-10) (-15))
+  , switch (vec 111 (-6) 12) (vec (-25) (-20) (-15))
+  ],
+  [ switch (vec 0  23 2) (vec (0) 10 5)
+  , switch (vec 22 25 0) (vec (0) 0 5)
+  , switch (vec 44 28 0) (vec (0) 0 0)
+  , switch (vec 66 30 0) (vec (0) 0 0)
+  , switch (vec 90 22 2) (vec (0) (-10) (-15))
+  , switch (vec 111 18 09) (vec (0) (-20) (-15))
+  ],
+  [ switch (vec 0  46 8) (vec (25) 10 5)
+  , switch (vec 22 48 6) (vec (25) 0 5)
+  , switch (vec 44 54 6) (vec (25) 0 0)
+  , switch (vec 66 56 6) (vec (25) 0 0)
+  , switch (vec 90 46 8) (vec (25) (-10) (-15))
+  , switch (vec 111 42 15) (vec (30) (-23) (-15))
+  ]
+  ]
+
+thumbPlate = [
+  [ switch (vec 0  0 6) (vec (-15) (15) 0)
+  , switch (vec 22 0 3) (vec (-15) 0 0)
+  , switch (vec 44 0 6) (vec (-15) (-15) 0)
+  ],
+  [ switch (vec 0  22 3) (vec 0 (15) 0)
+  , switch (vec 22 22 0) (vec 0 0 0)
+  , switch (vec 44 22 3) (vec 0 (-15) 0)
+  ],
+  [ switch (vec 0  44 6) (vec (15) (15) 0)
+  , switch (vec 22 44 3) (vec (15) 0 0)
+  , switch (vec 44 44 6) (vec (15) (-15) 0)
+  ]
+  ]
+
+withKeycaps = False
+
 main :: IO ()
-main = withFile "result.scad" WriteMode $ \h ->
-          mapM_ (hPutStrLn h) solve
+main = do withFile "main_plate.scad" WriteMode $ \h -> mapM_ (hPutStrLn h) (render mainPlate withKeycaps)
+          withFile "thumb_pad.scad" WriteMode $ \h -> mapM_ (hPutStrLn h) (render thumbPlate withKeycaps)
