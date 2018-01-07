@@ -6,6 +6,7 @@ import Data.Glome.Vec
 import Data.List
 import Control.Monad.State
 import Data.Foldable
+import Data.Maybe
 
 test = xfm_point (rotate (vec 1 0 0) (deg 90)) (vec 0 1 0)
 
@@ -208,35 +209,46 @@ renderUnion xs =
 
 color c xs = "color(" : [show c] ++ [") {"] ++ xs ++ ["}"]
 
-renderEnvelopePart :: [[Switch]] -> Envelope -> [String]
-renderEnvelopePart switches envelop = evalPolyhedron $
-  do let topCoords = concat $ map (\x -> [x !! 0, x !! 3]) $ map switchVertexes (head switches)
-     let bottomCoords = concat $ map (\x -> [x !! 4, x !! 7]) $ map switchVertexes (head switches)
-     a <- mapM addVertex topCoords
-     b <- mapM addVertex (front envelop)
-     c <- mapM addVertex bottomCoords
-     d <- mapM addVertex (liftEnvelop $ front envelop)
-     addSurface (a ++ reverse b)
-     addSurface (reverse c ++ d)
-     addSurface (reverse a ++ c)
+renderEnvelopePart :: [Vec] -> [Vec] -> [Vec] -> [Vec] -> [String]
+renderEnvelopePart a c b d = evalPolyhedron $
+  do a'<- mapM addVertex a
+     b'<- mapM addVertex b
+     c'<- mapM addVertex c
+     d'<- mapM addVertex d
+     addSurface (a' ++ reverse b')
+     addSurface (reverse c' ++ d')
+     addSurface (reverse a' ++ c')
      -- Open Scad sometimes uses ugly tessellation, so draw "by hands"
      -- addSurface (b ++ reverse d)
-     eachSquare [b, d] $ \t0 t1 t2 t4 -> addSurface [t4, t2, t1, t0]
-     addSurface [last c, last d, last b, last a]
-     addSurface [head a, head b, head d, head c]
+     eachSquare [b', d'] $ \t0 t1 t2 t4 -> addSurface [t4, t2, t1, t0]
+     addSurface [last c', last d', last b', last a']
+     addSurface [head a', head b', head d', head c']
+
+renderEnvelope :: [[Switch]] -> Maybe Envelope -> [String]
+renderEnvelope _ Nothing = []
+renderEnvelope switches (Just envelope) = concat [
+  renderEnvelopePart frontWallTop frontWallBottom (front envelope) (lowerEnvelop $ front envelope)
+  , renderEnvelopePart backWallTop backWallBottom (reverse $ back envelope) (reverse $ lowerEnvelop $ back envelope)
+  , renderEnvelopePart rightWallTop rigthWallBottom (right envelope) (lowerEnvelop $ right envelope)
+  , renderEnvelopePart leftWallTop leftWallBottom (reverse $ left envelope) (reverse $ lowerEnvelop $ left envelope)
+  ]
   where
-    liftEnvelop = map (\(Vec x y z) -> Vec x y (z - envelopHeight))
+    frontWallTop    = (concat $ map (\x -> [x !! 0, x !! 3]) $ map switchVertexes (head switches))
+    frontWallBottom = (concat $ map (\x -> [x !! 4, x !! 7]) $ map switchVertexes (head switches))
+    backWallTop     = (concat $ map (\x -> [x !! 2, x !! 1]) $ reverse $ map switchVertexes (last switches))
+    backWallBottom  = (concat $ map (\x -> [x !! 6, x !! 5]) $ reverse $ map switchVertexes (last switches))
+    rightWallTop    = (concat $ map (\x -> [x !! 3, x !! 2]) $ map switchVertexes (map last switches))
+    rigthWallBottom = (concat $ map (\x -> [x !! 7, x !! 6]) $ map switchVertexes (map last switches))
+    leftWallTop     = (concat $ map (\x -> [x !! 1, x !! 0]) $ reverse $ map switchVertexes (map head switches))
+    leftWallBottom  = (concat $ map (\x -> [x !! 5, x !! 4]) $ reverse $ map switchVertexes (map head switches))
+    lowerEnvelop = map (\(Vec x y z) -> Vec x y (z - envelopHeight))
 
-renderEnvelope :: [[Switch]] -> Envelope -> [String]
-renderEnvelope switches envelope =
-  renderEnvelopePart switches envelope
-
-render :: [[Switch]] -> Envelope -> [String]
-render switches envelop =
+render :: [[Switch]] -> Maybe Envelope -> [String]
+render switches envelope =
   renderUnion [[]
-              -- , plate
-              -- , (renderKeycaps $ concat switches)
-              , renderEnvelope switches envelop
+              , plate
+              , (renderKeycaps $ concat switches)
+              , renderEnvelope switches envelope
               ]
   where
     body = buildPlate switches >> renderPolyhedron
@@ -266,11 +278,13 @@ mainPlate = [
   ]
   ]
 
+ -- From left to right from front to back
+ -- Front and back sides are in same order. The same with left and right.
 mainEnvelop = Envelope {
-  left  = [],
-  right = [],
-  front = [vec (-20) (-30) 10, vec 50 (-30) 10, vec 130 (-50) 10],
-  back  = []
+    front = [vec (-20) (-30) 10,  vec 140 (-30) 10]
+  , back  = [vec (-20) (80) 10,   vec 140 (80) 10]
+  , left  = [head (front mainEnvelop), head (back mainEnvelop)]
+  , right = [last (front mainEnvelop), last (back mainEnvelop)]
   }
 
 thumbPlate = [
@@ -291,4 +305,5 @@ thumbPlate = [
 withKeycaps = False
 
 main :: IO ()
-main = do withFile "main_plate.scad" WriteMode $ \h -> mapM_ (hPutStrLn h) (render mainPlate mainEnvelop)
+main = do withFile "main_plate.scad" WriteMode  $ \h -> mapM_ (hPutStrLn h) (render mainPlate (Just mainEnvelop))
+          withFile "thumb_plate.scad" WriteMode $ \h -> mapM_ (hPutStrLn h) (render thumbPlate Nothing)
