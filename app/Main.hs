@@ -27,9 +27,15 @@ data PolyhedronSocket = PolyhedronSocket {
 
 type PolyhedronMonad a = State (Int, [Vec], [PolyhedronSurface]) a
 
--- get Socket Vertex
-sv :: Int -> PolyhedronSocket -> Int
-sv n (PolyhedronSocket xs) = xs !! n
+data Envelope = Envelope {
+  left  :: [Vec],
+  right :: [Vec],
+  front :: [Vec],
+  back  :: [Vec]
+  } deriving Show;
+
+socketVert :: Int -> PolyhedronSocket -> Int
+socketVert n (PolyhedronSocket xs) = xs !! n
 
 addVertex :: Vec -> PolyhedronMonad Int
 addVertex v = do (idx, vert', surf) <- get
@@ -45,19 +51,17 @@ addSurfaceSandwich :: PolyhedronSurface -> PolyhedronMonad ()
 addSurfaceSandwich v = do addSurface v
                           addSurface (reverse $ map topToBottom v)
 
-addSwitch :: Switch -> PolyhedronMonad PolyhedronSocket
-addSwitch (Switch centerPos (Vec ax ay az)) = do
-  ids <- mapM addVertex [
-      move $ vec (-w) (-w) h
-    , move $ vec (-w) w    h
-    , move $ vec w    w    h
-    , move $ vec w    (-w) h
-    , move $ vec (-w) (-w) (-h)
-    , move $ vec (-w) w    (-h)
-    , move $ vec w    w    (-h)
-    , move $ vec w    (-w) (-h)
-    ]
-  return (PolyhedronSocket ids)
+switchVertexes :: Switch -> [Vec]
+switchVertexes (Switch centerPos (Vec ax ay az)) =
+  [ move $ vec (-w) (-w) h
+  , move $ vec (-w) w    h
+  , move $ vec w    w    h
+  , move $ vec w    (-w) h
+  , move $ vec (-w) (-w) (-h)
+  , move $ vec (-w) w    (-h)
+  , move $ vec w    w    (-h)
+  , move $ vec w    (-w) (-h)
+  ]
   where
     rotation = compose [rotate (vec 1 0 0) (deg ax)
                        , rotate (vec 0 1 0) (deg ay)
@@ -66,37 +70,24 @@ addSwitch (Switch centerPos (Vec ax ay az)) = do
     w  = switchWidth / 2
     h  = switchHeight / 2
 
+addSwitch :: Switch -> PolyhedronMonad PolyhedronSocket
+addSwitch switch = fmap PolyhedronSocket $ mapM addVertex (switchVertexes switch)
+
 addTopBottomSurf :: PolyhedronSocket -> PolyhedronMonad ()
 addTopBottomSurf sw =
   addSurfaceSandwich $ map (socketVertIds sw !!) [0, 1, 2, 3]
 
 addLeftToRightSurf :: PolyhedronSocket -> PolyhedronSocket -> PolyhedronMonad ()
 addLeftToRightSurf l r =
-  addSurfaceSandwich [sv 1 r, sv 0 r, sv 3 l, sv 2 l]
+  addSurfaceSandwich [socketVert 1 r, socketVert 0 r, socketVert 3 l, socketVert 2 l]
 
 addNearToFarSurf :: PolyhedronSocket -> PolyhedronSocket -> PolyhedronMonad ()
 addNearToFarSurf n f =
-  addSurfaceSandwich [sv 1 n, sv 0 f, sv 3 f, sv 2 n]
+  addSurfaceSandwich [socketVert 1 n, socketVert 0 f, socketVert 3 f, socketVert 2 n]
 
 addMiddleSurf :: PolyhedronSocket -> PolyhedronSocket -> PolyhedronSocket -> PolyhedronSocket -> PolyhedronMonad ()
 addMiddleSurf s0 s1 s2 s3 =
-  addSurfaceSandwich [sv 2 s0, sv 3 s1, sv 0 s2, sv 1 s3]
-
--- right_wall sw = [verts sw [3, 2, 6, 7]]
-
--- left_wall sw = [verts sw [4, 5, 1, 0]]
-
--- near_wall sw = [verts sw [0, 3, 7, 4]]
-
--- far_wall sw = [verts sw [2, 1, 5, 6]]
-
--- connect_right_wall_near_far n f = [[t2 n, t3 f, b3 f, b2 n]]
-
--- connect_left_wall_near_far n f = [[t0 f, t1 n, b1 n, b0 f]]
-
--- connect_near_wall_left_right l r = [[t3 l, t0 r, b0 r, b3 l]]
-
--- connect_far_wall_left_right l r = [[t1 r, t2 l, b2 l, b1 r]]
+  addSurfaceSandwich [socketVert 2 s0, socketVert 3 s1, socketVert 0 s2, socketVert 1 s3]
 
 pairs :: [a] -> [(a, a)]
 pairs [] = []
@@ -115,20 +106,20 @@ eachSquare sockets f = do
 
 addFrontWall :: [[PolyhedronSocket]] -> PolyhedronMonad ()
 addFrontWall sockets = do
-  let frontSurfTopLine = concat $ map (\s -> [sv 0 s, sv 3 s]) $ head sockets
+  let frontSurfTopLine = concat $ map (\s -> [socketVert 0 s, socketVert 3 s]) $ head sockets
   addSurface(frontSurfTopLine ++ reverse (map topToBottom frontSurfTopLine))
 
 addBackWall :: [[PolyhedronSocket]] -> PolyhedronMonad ()
 addBackWall sockets = do
-  let backSurfTopLine = concat $ map (\s -> [sv 1 s, sv 2 s]) $ last sockets
+  let backSurfTopLine = concat $ map (\s -> [socketVert 1 s, socketVert 2 s]) $ last sockets
   addSurface(reverse backSurfTopLine ++ map topToBottom backSurfTopLine)
 
 addLeftWall sockets = do
-  let leftSurfTopLine = concat $ map (\s -> [sv 0 s, sv 1 s]) $ map head sockets
+  let leftSurfTopLine = concat $ map (\s -> [socketVert 0 s, socketVert 1 s]) $ map head sockets
   addSurface(reverse leftSurfTopLine ++ map topToBottom leftSurfTopLine)
 
 addRightWall sockets = do
-  let rightSurfTopLine = concat $ map (\s -> [sv 3 s, sv 2 s]) $ map last sockets
+  let rightSurfTopLine = concat $ map (\s -> [socketVert 3 s, socketVert 2 s]) $ map last sockets
   addSurface(rightSurfTopLine ++ reverse (map topToBottom rightSurfTopLine))
 
 buildPlate :: [[Switch]] -> PolyhedronMonad ()
@@ -136,9 +127,9 @@ buildPlate switches = do
   sockets <- sequence $ map (sequence . map addSwitch) (switches)
   for_ (concat sockets) addTopBottomSurf
   for_ sockets $ \line ->
-    for_ (pairs $ line) (uncurry addLeftToRightSurf)
+    for_ (pairs line) (uncurry addLeftToRightSurf)
   for_ (transpose sockets) $ \row ->
-    for_ (pairs $ row) (uncurry addNearToFarSurf)
+    for_ (pairs row) (uncurry addNearToFarSurf)
   eachSquare sockets addMiddleSurf
   addFrontWall sockets
   addBackWall sockets
@@ -158,6 +149,9 @@ renderPolyhedron = do (_, verts', surfs) <- get
                         , "]);"
                         ]
 
+evalPolyhedron :: PolyhedronMonad a -> [String]
+evalPolyhedron m = evalState (m >> renderPolyhedron) (0, [], [])
+
 switchWidth = 19.05
 switchHeight = 5
 holeWidth = 14
@@ -166,6 +160,7 @@ keycapBottomWidth = 19.05
 keycapTopWidth = 14
 keycapHeight = 10
 keycapElevation = 6
+envelopHeight = 5
 
 renderVec :: Vec -> String
 renderVec (Vec x y z) = "[" ++ (show x) ++ ", " ++ (show y) ++ ", " ++ (show z) ++ "]"
@@ -207,13 +202,39 @@ renderKeycaps switches = concat (map renderKeycap switches)
 renderDifference xs ys =
   "difference() {" : xs ++ ys ++ ["};"]
 
-renderUnion xs ys =
-  "union() {" : xs ++ ys ++ ["};"]
+renderUnion :: [[String]] -> [String]
+renderUnion xs =
+  "union() {" : (concat xs) ++ ["};"]
 
 color c xs = "color(" : [show c] ++ [") {"] ++ xs ++ ["}"]
 
-render :: [[Switch]] -> [String]
-render switches = renderUnion plate (renderKeycaps $ concat switches)
+renderEnvelopePart :: [[Switch]] -> Envelope -> [String]
+renderEnvelopePart switches envelop = evalPolyhedron $
+  do let topCoords = concat $ map (\x -> [x !! 0, x !! 3]) $ map switchVertexes (head switches)
+     let bottomCoords = concat $ map (\x -> [x !! 4, x !! 7]) $ map switchVertexes (head switches)
+     a <- mapM addVertex topCoords
+     b <- mapM addVertex (front envelop)
+     c <- mapM addVertex bottomCoords
+     d <- mapM addVertex (liftEnvelop $ front envelop)
+     addSurface (a ++ reverse b)
+     addSurface (reverse c ++ d)
+     addSurface (reverse a ++ c)
+     addSurface (b ++ reverse d)
+     addSurface [last c, last d, last b, last a]
+     addSurface [head a, head b, head d, head c]
+  where
+    liftEnvelop = map (\(Vec x y z) -> Vec x y (z - envelopHeight))
+
+renderEnvelope :: [[Switch]] -> Envelope -> [String]
+renderEnvelope switches envelope =
+  renderEnvelopePart switches envelope
+
+render :: [[Switch]] -> Envelope -> [String]
+render switches envelop =
+  renderUnion [plate
+              , (renderKeycaps $ concat switches)
+              , renderEnvelope switches envelop
+              ]
   where
     body = buildPlate switches >> renderPolyhedron
     platePolyhedron = evalState body (0, [], [])
@@ -242,6 +263,13 @@ mainPlate = [
   ]
   ]
 
+mainEnvelop = Envelope {
+  left  = [],
+  right = [],
+  front = [vec (-20) (-30) 10, vec 130 (-50) 10],
+  back  = []
+  }
+
 thumbPlate = [
   [ Switch (vec 0  0 6) (vec (-15) (15) 0)
   , Switch (vec 22 0 3) (vec (-15) 0 0)
@@ -260,4 +288,4 @@ thumbPlate = [
 withKeycaps = False
 
 main :: IO ()
-main = do withFile "main_plate.scad" WriteMode $ \h -> mapM_ (hPutStrLn h) (render mainPlate)
+main = do withFile "main_plate.scad" WriteMode $ \h -> mapM_ (hPutStrLn h) (render mainPlate mainEnvelop)
