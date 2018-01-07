@@ -281,10 +281,10 @@ mainPlate = [
  -- From left to right from front to back
  -- Front and back sides are in same order. The same with left and right.
 mainEnvelop = Envelope {
-    front = [vec (-20) (-30) 10,  vec 140 (-30) 10]
-  , back  = [vec (-20) (80) 10,   vec 140 (80) 10]
+    front = [vec (-20) (-20) 10, vec 50 (-20) 10]
+  , back  = [vec (-20) (70) 10, vec 140 (70) 10]
   , left  = [head (front mainEnvelop), head (back mainEnvelop)]
-  , right = [last (front mainEnvelop), last (back mainEnvelop)]
+  , right = [vec 140 (10) 10, last (back mainEnvelop)]
   }
 
 thumbPlate = [
