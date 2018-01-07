@@ -93,8 +93,8 @@ pairs :: [a] -> [(a, a)]
 pairs [] = []
 pairs xs = drop 2 $ scanl (\(_, b) c -> (b, c)) (head xs, head xs) xs
 
-eachSquare :: [[PolyhedronSocket]]
-           -> (PolyhedronSocket -> PolyhedronSocket -> PolyhedronSocket -> PolyhedronSocket -> PolyhedronMonad a)
+eachSquare :: [[a]]
+           -> (a -> a -> a -> a -> PolyhedronMonad b)
            -> PolyhedronMonad ()
 eachSquare sockets f = do
   for_ [0 .. (height - 2)] $ \y' ->
@@ -219,7 +219,9 @@ renderEnvelopePart switches envelop = evalPolyhedron $
      addSurface (a ++ reverse b)
      addSurface (reverse c ++ d)
      addSurface (reverse a ++ c)
-     addSurface (b ++ reverse d)
+     -- Open Scad sometimes uses ugly tessellation, so draw "by hands"
+     -- addSurface (b ++ reverse d)
+     eachSquare [b, d] $ \t0 t1 t2 t4 -> addSurface [t4, t2, t1, t0]
      addSurface [last c, last d, last b, last a]
      addSurface [head a, head b, head d, head c]
   where
@@ -231,8 +233,9 @@ renderEnvelope switches envelope =
 
 render :: [[Switch]] -> Envelope -> [String]
 render switches envelop =
-  renderUnion [plate
-              , (renderKeycaps $ concat switches)
+  renderUnion [[]
+              -- , plate
+              -- , (renderKeycaps $ concat switches)
               , renderEnvelope switches envelop
               ]
   where
@@ -266,7 +269,7 @@ mainPlate = [
 mainEnvelop = Envelope {
   left  = [],
   right = [],
-  front = [vec (-20) (-30) 10, vec 130 (-50) 10],
+  front = [vec (-20) (-30) 10, vec 50 (-30) 10, vec 130 (-50) 10],
   back  = []
   }
 
