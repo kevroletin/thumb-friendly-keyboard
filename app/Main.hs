@@ -78,8 +78,8 @@ addLeftToRightSurf :: PolyhedronSocket -> PolyhedronSocket -> PolyhedronMonad ()
 addLeftToRightSurf l r =
   addSurfaceSandwich [socketVert 1 r, socketVert 0 r, socketVert 3 l, socketVert 2 l]
 
-addNearToFarSurf :: PolyhedronSocket -> PolyhedronSocket -> PolyhedronMonad ()
-addNearToFarSurf n f =
+addFrontToBackSurf :: PolyhedronSocket -> PolyhedronSocket -> PolyhedronMonad ()
+addFrontToBackSurf n f =
   addSurfaceSandwich [socketVert 1 n, socketVert 0 f, socketVert 3 f, socketVert 2 n]
 
 addMiddleSurf :: PolyhedronSocket -> PolyhedronSocket -> PolyhedronSocket -> PolyhedronSocket -> PolyhedronMonad ()
@@ -123,18 +123,20 @@ addRightWall sockets = do
 
 buildPlate :: [[Switch]] -> PolyhedronMonad ()
 buildPlate switches = do
-  sockets <- sequence $ map (sequence . map addSwitch) (switches)
+  sockets <- addSwitches switches
   for_ (concat sockets) addTopBottomSurf
   for_ sockets $ \line ->
     for_ (pairs line) (uncurry addLeftToRightSurf)
   for_ (transpose sockets) $ \row ->
-    for_ (pairs row) (uncurry addNearToFarSurf)
+    for_ (pairs row) (uncurry addFrontToBackSurf)
   eachSquare sockets addMiddleSurf
   addFrontWall sockets
   addBackWall sockets
   addLeftWall sockets
   addRightWall sockets
   return ()
+  where
+    addSwitches xs = sequence $ map (sequence . map addSwitch) xs
 
 renderPolyhedron :: PolyhedronMonad [String]
 renderPolyhedron = do (_, verts', surfs) <- get
@@ -281,26 +283,28 @@ render switches envelope =
 
 mainPlate :: [[Switch]]
 mainPlate = [
-  [ Switch (V.vec 0  (0) 7) (V.vec (-25) 10 5)
-  , Switch (V.vec 22 (2) 4) (V.vec (-25) 0 5)
-  , Switch (V.vec 44 (2) 4) (V.vec (-25) 0 0)
-  , Switch (V.vec 66 (4) 4) (V.vec (-25) 0 0)
-  , Switch (V.vec 90 (-2) 6) (V.vec (-25) (-10) (-15))
-  , Switch (V.vec 111 (-6) 12) (V.vec (-25) (-20) (-15))
-  ], [ Switch (V.vec 0  23 2) (V.vec (0) 10 5) , Switch (V.vec 22 25 0) (V.vec (0) 0 5)
-  , Switch (V.vec 44 28 0) (V.vec (0) 0 0)
-  , Switch (V.vec 66 30 0) (V.vec (0) 0 0)
-  , Switch (V.vec 90 22 2) (V.vec (0) (-10) (-15))
-  , Switch (V.vec 111 18 09) (V.vec (0) (-20) (-15))
-  ],
-  [ Switch (V.vec 0  46 8) (V.vec (25) 10 5)
-  , Switch (V.vec 22 48 6) (V.vec (25) 0 5)
-  , Switch (V.vec 44 54 6) (V.vec (25) 0 0)
-  , Switch (V.vec 66 56 6) (V.vec (25) 0 0)
-  , Switch (V.vec 90 46 8) (V.vec (25) (-10) (-15))
-  , Switch (V.vec 111 42 15) (V.vec (30) (-23) (-15))
-  ]
-  ]
+ [ Switch (V.vec 0   0    7)  (V.vec (-25) 10    5)
+ , Switch (V.vec 22  2    4)  (V.vec (-25) 0     5)
+ , Switch (V.vec 44  2    4)  (V.vec (-25) 0     0)
+ , Switch (V.vec 66  4    4)  (V.vec (-25) 0     0)
+ , Switch (V.vec 90  (-2) 6)  (V.vec (-25) (-10) (-15))
+ , Switch (V.vec 111 (-6) 12) (V.vec (-25) (-20) (-15))
+ ],
+ [ Switch (V.vec 0   23   2)  (V.vec (0)   10    5)
+ , Switch (V.vec 22  25   0)  (V.vec (0)   0     5)
+ , Switch (V.vec 44  28   0)  (V.vec (0)   0     0)
+ , Switch (V.vec 66  30   0)  (V.vec (0)   0     0)
+ , Switch (V.vec 90  22   2)  (V.vec (0)   (-10) (-15))
+ , Switch (V.vec 111 18   09) (V.vec (0)   (-20) (-15))
+ ],
+ [ Switch (V.vec 0   46   8)  (V.vec (25)  10    5)
+ , Switch (V.vec 22  48   6)  (V.vec (25)  0     5)
+ , Switch (V.vec 44  54   6)  (V.vec (25)  0     0)
+ , Switch (V.vec 66  56   6)  (V.vec (25)  0     0)
+ , Switch (V.vec 90  46   8)  (V.vec (25)  (-10) (-15))
+ , Switch (V.vec 111 42   15) (V.vec (30)  (-23) (-15))
+ ]
+ ]
 
  -- From left to right from front to back
  -- Front and back sides are in same order. The same with left and right.
@@ -314,19 +318,19 @@ mainEnvelop = Envelope {
 
 thumbPlate :: [[Switch]]
 thumbPlate = [
-  [ Switch (V.vec 0  0 6) (V.vec (-15) (15) 0)
-  , Switch (V.vec 22 0 3) (V.vec (-15) 0 0)
-  , Switch (V.vec 44 0 6) (V.vec (-15) (-15) 0)
-  ],
-  [ Switch (V.vec 0  22 3) (V.vec 0 (15) 0)
-  , Switch (V.vec 22 22 0) (V.vec 0 0 0)
-  , Switch (V.vec 44 22 3) (V.vec 0 (-15) 0)
-  ],
-  [ Switch (V.vec 0  44 6) (V.vec (15) (15) 0)
-  , Switch (V.vec 22 44 3) (V.vec (15) 0 0)
-  , Switch (V.vec 44 44 6) (V.vec (15) (-15) 0)
-  ]
-  ]
+ [ Switch (V.vec 0  0  6) (V.vec (-15) (15)  0)
+ , Switch (V.vec 22 0  3) (V.vec (-15) 0     0)
+ , Switch (V.vec 44 0  6) (V.vec (-15) (-15) 0)
+ ],
+ [ Switch (V.vec 0  22 3) (V.vec 0     (15)  0)
+ , Switch (V.vec 22 22 0) (V.vec 0     0     0)
+ , Switch (V.vec 44 22 3) (V.vec 0     (-15) 0)
+ ],
+ [ Switch (V.vec 0  44 6) (V.vec (15)  (15)  0)
+ , Switch (V.vec 22 44 3) (V.vec (15)  0     0)
+ , Switch (V.vec 44 44 6) (V.vec (15)  (-15) 0)
+ ]
+ ]
 
 withKeycaps :: Bool
 withKeycaps = False
