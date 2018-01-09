@@ -233,20 +233,23 @@ renderUnion xs =
 color :: String -> [String] -> [String]
 color c xs = "color(" : [show c] ++ [") {"] ++ xs ++ ["}"]
 
+-- Connects plate with vertexes from envelope. Orientation of bottom paths is
+-- the same as corresponding top paths.
+-- plateTop -> plateBottom -> envelopeTop -> envelopeBottom
 renderEnvelopePart :: [V.Vec] -> [V.Vec] -> [V.Vec] -> [V.Vec] -> [String]
-renderEnvelopePart a c b d = evalPolyhedron $
-  do a'<- mapM addVertex a
-     b'<- mapM addVertex b
-     c'<- mapM addVertex c
-     d'<- mapM addVertex d
-     addSurface (a' ++ reverse b')
-     addSurface (reverse c' ++ d')
-     addSurface (reverse a' ++ c')
+renderEnvelopePart pt pb et eb = evalPolyhedron $
+  do pt'<- mapM addVertex pt
+     et'<- mapM addVertex et
+     pb'<- mapM addVertex pb
+     eb'<- mapM addVertex eb
+     addSurface (pt' ++ reverse et')
+     addSurface (reverse pb' ++ eb')
+     addSurface (reverse pt' ++ pb')
      -- Open Scad sometimes uses ugly tessellation, so draw "by hands"
-     -- addSurface (b ++ reverse d)
-     eachSquare [b', d'] $ \t0 t1 t2 t4 -> addSurface [t4, t2, t1, t0]
-     addSurface [last c', last d', last b', last a']
-     addSurface [head a', head b', head d', head c']
+     -- addSurface (et ++ reverse eb')
+     eachSquare [et', eb'] $ \t0 t1 t2 t4 -> addSurface [t4, t2, t1, t0]
+     addSurface [last pb', last eb', last et', last pt']
+     addSurface [head pt', head et', head eb', head pb']
 
 renderEnvelope :: [[Switch]] -> Maybe Envelope -> [String]
 renderEnvelope _ Nothing = []
