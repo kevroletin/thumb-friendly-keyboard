@@ -1,14 +1,10 @@
 module Main where
 
-import Lib
 import System.IO
-import Data.Glome.Vec
+import qualified Data.Glome.Vec as V
 import Data.List
 import Control.Monad.State
 import Data.Foldable
-import Data.Maybe
-
-test = xfm_point (rotate (vec 1 0 0) (deg 90)) (vec 0 1 0)
 
 -- We assume next view location:
 -- + x goes from left to right
@@ -16,8 +12,8 @@ test = xfm_point (rotate (vec 1 0 0) (deg 90)) (vec 0 1 0)
 data OldSocket = OldSocket Int deriving Show
 
 data Switch = Switch {
-  pos :: Vec,
-  angles :: Vec
+  pos :: V.Vec,
+  angles :: V.Vec
   } deriving Show;
 
 type PolyhedronSurface = [Int]
@@ -26,19 +22,19 @@ data PolyhedronSocket = PolyhedronSocket {
   socketVertIds :: [Int]
   } deriving Show
 
-type PolyhedronMonad a = State (Int, [Vec], [PolyhedronSurface]) a
+type PolyhedronMonad a = State (Int, [V.Vec], [PolyhedronSurface]) a
 
 data Envelope = Envelope {
-  left  :: [Vec],
-  right :: [Vec],
-  front :: [Vec],
-  back  :: [Vec]
+  left  :: [V.Vec],
+  right :: [V.Vec],
+  front :: [V.Vec],
+  back  :: [V.Vec]
   } deriving Show;
 
 socketVert :: Int -> PolyhedronSocket -> Int
 socketVert n (PolyhedronSocket xs) = xs !! n
 
-addVertex :: Vec -> PolyhedronMonad Int
+addVertex :: V.Vec -> PolyhedronMonad Int
 addVertex v = do (idx, vert', surf) <- get
                  put (idx + 1, vert' ++ [v], surf)
                  return idx
@@ -52,22 +48,22 @@ addSurfaceSandwich :: PolyhedronSurface -> PolyhedronMonad ()
 addSurfaceSandwich v = do addSurface v
                           addSurface (reverse $ map topToBottom v)
 
-switchVertexes :: Switch -> [Vec]
-switchVertexes (Switch centerPos (Vec ax ay az)) =
-  [ move $ vec (-w) (-w) h
-  , move $ vec (-w) w    h
-  , move $ vec w    w    h
-  , move $ vec w    (-w) h
-  , move $ vec (-w) (-w) (-h)
-  , move $ vec (-w) w    (-h)
-  , move $ vec w    w    (-h)
-  , move $ vec w    (-w) (-h)
+switchVertexes :: Switch -> [V.Vec]
+switchVertexes (Switch centerPos (V.Vec ax ay az)) =
+  [ move $ V.vec (-w) (-w) h
+  , move $ V.vec (-w) w    h
+  , move $ V.vec w    w    h
+  , move $ V.vec w    (-w) h
+  , move $ V.vec (-w) (-w) (-h)
+  , move $ V.vec (-w) w    (-h)
+  , move $ V.vec w    w    (-h)
+  , move $ V.vec w    (-w) (-h)
   ]
   where
-    rotation = compose [rotate (vec 1 0 0) (deg ax)
-                       , rotate (vec 0 1 0) (deg ay)
-                       , rotate (vec 0 0 1) (deg az)]
-    move = xfm_point (xfm_mult (translate centerPos) rotation)
+    rotation = V.compose [V.rotate (V.vec 1 0 0) (V.deg ax)
+                         , V.rotate (V.vec 0 1 0) (V.deg ay)
+                         , V.rotate (V.vec 0 0 1) (V.deg az)]
+    move = V.xfm_point (V.xfm_mult (V.translate centerPos) rotation)
     w  = switchWidth / 2
     h  = switchHeight / 2
 
@@ -115,10 +111,12 @@ addBackWall sockets = do
   let backSurfTopLine = concat $ map (\s -> [socketVert 1 s, socketVert 2 s]) $ last sockets
   addSurface(reverse backSurfTopLine ++ map topToBottom backSurfTopLine)
 
+addLeftWall :: [[PolyhedronSocket]] -> PolyhedronMonad ()
 addLeftWall sockets = do
   let leftSurfTopLine = concat $ map (\s -> [socketVert 0 s, socketVert 1 s]) $ map head sockets
   addSurface(reverse leftSurfTopLine ++ map topToBottom leftSurfTopLine)
 
+addRightWall :: [[PolyhedronSocket]] -> PolyhedronMonad ()
 addRightWall sockets = do
   let rightSurfTopLine = concat $ map (\s -> [socketVert 3 s, socketVert 2 s]) $ map last sockets
   addSurface(rightSurfTopLine ++ reverse (map topToBottom rightSurfTopLine))
@@ -153,26 +151,47 @@ renderPolyhedron = do (_, verts', surfs) <- get
 evalPolyhedron :: PolyhedronMonad a -> [String]
 evalPolyhedron m = evalState (m >> renderPolyhedron) (0, [], [])
 
+switchWidth :: Double
 switchWidth = 19.05
+
+switchHeight :: Double
 switchHeight = 5
-holeWidth = 14
+
+holeWidth :: Double
+holeWidth = 14.3
+
+holeHeight :: Double
 holeHeight = 12
+
+keycapBottomWidth :: Double
 keycapBottomWidth = 19.05
+
+keycapTopWidth :: Double
 keycapTopWidth = 14
+
+keycapHeight :: Double
 keycapHeight = 10
+
+keycapElevation :: Double
 keycapElevation = 6
+
+envelopHeight :: Double
 envelopHeight = 5
 
-renderVec :: Vec -> String
-renderVec (Vec x y z) = "[" ++ (show x) ++ ", " ++ (show y) ++ ", " ++ (show z) ++ "]"
+renderVec :: V.Vec -> String
+renderVec (V.Vec x y z) = "[" ++ (show x) ++ ", " ++ (show y) ++ ", " ++ (show z) ++ "]"
 
 renderSurface :: PolyhedronSurface -> String
 renderSurface xs = show xs
 
+topToBottom :: Int -> Int
 topToBottom = (+ 4)
+
+sandwich :: [Int] -> [[Int]]
 sandwich xs = [xs, reverse $ map topToBottom xs]
 
-renderHoleCube (Switch (Vec x y z) (Vec ax ay az)) = [
+renderHoleCube :: Switch -> [String]
+renderHoleCube (Switch (V.Vec x y z) (V.Vec ax ay az)) = [
   "translate(" ++ show [x, y, z] ++ ")"
   , "rotate(" ++ show [ax, ay, az] ++ ")"
   , "translate(" ++ show [-hw, -hw, -hh] ++ ")"
@@ -182,7 +201,8 @@ renderHoleCube (Switch (Vec x y z) (Vec ax ay az)) = [
     hw = holeWidth / 2
     hh = holeHeight / 2
 
-renderKeycap (Switch (Vec x y z) (Vec ax ay az)) = [
+renderKeycap :: Switch -> [String]
+renderKeycap (Switch (V.Vec x y z) (V.Vec ax ay az)) = [
   "translate(" ++ show [x, y, z] ++ ")"
   , "rotate(" ++ show [ax, ay, az] ++ ")"
   , "hull() {"
@@ -196,10 +216,13 @@ renderKeycap (Switch (Vec x y z) (Vec ax ay az)) = [
     hbw = keycapBottomWidth / 2
     htw = keycapTopWidth / 2
 
+renderHoles :: [Switch] -> [String]
 renderHoles switches = concat (map renderHoleCube switches)
 
+renderKeycaps :: [Switch] -> [String]
 renderKeycaps switches = concat (map renderKeycap switches)
 
+renderDifference :: [String] -> [String] -> [String]
 renderDifference xs ys =
   "difference() {" : xs ++ ys ++ ["};"]
 
@@ -207,9 +230,10 @@ renderUnion :: [[String]] -> [String]
 renderUnion xs =
   "union() {" : (concat xs) ++ ["};"]
 
+color :: String -> [String] -> [String]
 color c xs = "color(" : [show c] ++ [") {"] ++ xs ++ ["}"]
 
-renderEnvelopePart :: [Vec] -> [Vec] -> [Vec] -> [Vec] -> [String]
+renderEnvelopePart :: [V.Vec] -> [V.Vec] -> [V.Vec] -> [V.Vec] -> [String]
 renderEnvelopePart a c b d = evalPolyhedron $
   do a'<- mapM addVertex a
      b'<- mapM addVertex b
@@ -241,13 +265,13 @@ renderEnvelope switches (Just envelope) = concat [
     rigthWallBottom = (concat $ map (\x -> [x !! 7, x !! 6]) $ map switchVertexes (map last switches))
     leftWallTop     = (concat $ map (\x -> [x !! 1, x !! 0]) $ reverse $ map switchVertexes (map head switches))
     leftWallBottom  = (concat $ map (\x -> [x !! 5, x !! 4]) $ reverse $ map switchVertexes (map head switches))
-    lowerEnvelop = map (\(Vec x y z) -> Vec x y (z - envelopHeight))
+    lowerEnvelop = map (\(V.Vec x y z) -> V.Vec x y (z - envelopHeight))
 
 render :: [[Switch]] -> Maybe Envelope -> [String]
 render switches envelope =
   renderUnion [[]
               , plate
-              , (renderKeycaps $ concat switches)
+              -- , (renderKeycaps $ concat switches)
               , renderEnvelope switches envelope
               ]
   where
@@ -257,53 +281,57 @@ render switches envelope =
 
 mainPlate :: [[Switch]]
 mainPlate = [
-  [ Switch (vec 0  (0) 7) (vec (-25) 10 5)
-  , Switch (vec 22 (2) 4) (vec (-25) 0 5)
-  , Switch (vec 44 (2) 4) (vec (-25) 0 0)
-  , Switch (vec 66 (4) 4) (vec (-25) 0 0)
-  , Switch (vec 90 (-2) 6) (vec (-25) (-10) (-15))
-  , Switch (vec 111 (-6) 12) (vec (-25) (-20) (-15))
-  ], [ Switch (vec 0  23 2) (vec (0) 10 5) , Switch (vec 22 25 0) (vec (0) 0 5)
-  , Switch (vec 44 28 0) (vec (0) 0 0)
-  , Switch (vec 66 30 0) (vec (0) 0 0)
-  , Switch (vec 90 22 2) (vec (0) (-10) (-15))
-  , Switch (vec 111 18 09) (vec (0) (-20) (-15))
+  [ Switch (V.vec 0  (0) 7) (V.vec (-25) 10 5)
+  , Switch (V.vec 22 (2) 4) (V.vec (-25) 0 5)
+  , Switch (V.vec 44 (2) 4) (V.vec (-25) 0 0)
+  , Switch (V.vec 66 (4) 4) (V.vec (-25) 0 0)
+  , Switch (V.vec 90 (-2) 6) (V.vec (-25) (-10) (-15))
+  , Switch (V.vec 111 (-6) 12) (V.vec (-25) (-20) (-15))
+  ], [ Switch (V.vec 0  23 2) (V.vec (0) 10 5) , Switch (V.vec 22 25 0) (V.vec (0) 0 5)
+  , Switch (V.vec 44 28 0) (V.vec (0) 0 0)
+  , Switch (V.vec 66 30 0) (V.vec (0) 0 0)
+  , Switch (V.vec 90 22 2) (V.vec (0) (-10) (-15))
+  , Switch (V.vec 111 18 09) (V.vec (0) (-20) (-15))
   ],
-  [ Switch (vec 0  46 8) (vec (25) 10 5)
-  , Switch (vec 22 48 6) (vec (25) 0 5)
-  , Switch (vec 44 54 6) (vec (25) 0 0)
-  , Switch (vec 66 56 6) (vec (25) 0 0)
-  , Switch (vec 90 46 8) (vec (25) (-10) (-15))
-  , Switch (vec 111 42 15) (vec (30) (-23) (-15))
+  [ Switch (V.vec 0  46 8) (V.vec (25) 10 5)
+  , Switch (V.vec 22 48 6) (V.vec (25) 0 5)
+  , Switch (V.vec 44 54 6) (V.vec (25) 0 0)
+  , Switch (V.vec 66 56 6) (V.vec (25) 0 0)
+  , Switch (V.vec 90 46 8) (V.vec (25) (-10) (-15))
+  , Switch (V.vec 111 42 15) (V.vec (30) (-23) (-15))
   ]
   ]
 
  -- From left to right from front to back
  -- Front and back sides are in same order. The same with left and right.
+mainEnvelop :: Envelope
 mainEnvelop = Envelope {
-    front = [vec (-20) (-20) 10, vec 50 (-20) 10]
-  , back  = [vec (-20) (70) 10, vec 140 (70) 10]
+    front = [V.vec (-20) (-20) 10, V.vec 50 (-20) 10]
+  , back  = [V.vec (-20) (70) 10, V.vec 140 (70) 10]
   , left  = [head (front mainEnvelop), head (back mainEnvelop)]
-  , right = [vec 140 (10) 10, last (back mainEnvelop)]
+  , right = [V.vec 140 (10) 10, last (back mainEnvelop)]
   }
 
+thumbPlate :: [[Switch]]
 thumbPlate = [
-  [ Switch (vec 0  0 6) (vec (-15) (15) 0)
-  , Switch (vec 22 0 3) (vec (-15) 0 0)
-  , Switch (vec 44 0 6) (vec (-15) (-15) 0)
+  [ Switch (V.vec 0  0 6) (V.vec (-15) (15) 0)
+  , Switch (V.vec 22 0 3) (V.vec (-15) 0 0)
+  , Switch (V.vec 44 0 6) (V.vec (-15) (-15) 0)
   ],
-  [ Switch (vec 0  22 3) (vec 0 (15) 0)
-  , Switch (vec 22 22 0) (vec 0 0 0)
-  , Switch (vec 44 22 3) (vec 0 (-15) 0)
+  [ Switch (V.vec 0  22 3) (V.vec 0 (15) 0)
+  , Switch (V.vec 22 22 0) (V.vec 0 0 0)
+  , Switch (V.vec 44 22 3) (V.vec 0 (-15) 0)
   ],
-  [ Switch (vec 0  44 6) (vec (15) (15) 0)
-  , Switch (vec 22 44 3) (vec (15) 0 0)
-  , Switch (vec 44 44 6) (vec (15) (-15) 0)
+  [ Switch (V.vec 0  44 6) (V.vec (15) (15) 0)
+  , Switch (V.vec 22 44 3) (V.vec (15) 0 0)
+  , Switch (V.vec 44 44 6) (V.vec (15) (-15) 0)
   ]
   ]
 
+withKeycaps :: Bool
 withKeycaps = False
 
 main :: IO ()
-main = do withFile "main_plate.scad" WriteMode  $ \h -> mapM_ (hPutStrLn h) (render mainPlate (Just mainEnvelop))
+main = do withFile "main_plate.scad"  WriteMode  $ \h -> mapM_ (hPutStrLn h) (render mainPlate (Just mainEnvelop))
+          withFile "main_plate2.scad" WriteMode  $ \h -> mapM_ (hPutStrLn h) (render mainPlate Nothing)
           withFile "thumb_plate.scad" WriteMode $ \h -> mapM_ (hPutStrLn h) (render thumbPlate Nothing)
