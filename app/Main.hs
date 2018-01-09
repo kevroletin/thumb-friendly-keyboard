@@ -101,25 +101,24 @@ eachSquare sockets f = do
     width = length (head sockets)
     height = length sockets
 
+addWall :: Int -> Int -> [PolyhedronSocket] -> (PolyhedronSurface -> PolyhedronSurface) -> PolyhedronMonad ()
+addWall a b xs f = do
+  let topLine    = concat $ map (\s -> [socketVert a s, socketVert b s]) xs
+  let bottomLine = concat $ map (\s -> [socketVert (topToBottom b) s, socketVert (topToBottom a) s]) (reverse xs)
+  let res = topLine ++ bottomLine
+  addSurface(f res)
+
 addFrontWall :: [[PolyhedronSocket]] -> PolyhedronMonad ()
-addFrontWall sockets = do
-  let frontSurfTopLine = concat $ map (\s -> [socketVert 0 s, socketVert 3 s]) $ head sockets
-  addSurface(frontSurfTopLine ++ reverse (map topToBottom frontSurfTopLine))
+addFrontWall sockets = addWall 0 3 (head sockets) id
 
 addBackWall :: [[PolyhedronSocket]] -> PolyhedronMonad ()
-addBackWall sockets = do
-  let backSurfTopLine = concat $ map (\s -> [socketVert 1 s, socketVert 2 s]) $ last sockets
-  addSurface(reverse backSurfTopLine ++ map topToBottom backSurfTopLine)
+addBackWall sockets = addWall 1 2 (last sockets) reverse
 
 addLeftWall :: [[PolyhedronSocket]] -> PolyhedronMonad ()
-addLeftWall sockets = do
-  let leftSurfTopLine = concat $ map (\s -> [socketVert 0 s, socketVert 1 s]) $ map head sockets
-  addSurface(reverse leftSurfTopLine ++ map topToBottom leftSurfTopLine)
+addLeftWall sockets = addWall 0 1 (map head sockets) reverse
 
 addRightWall :: [[PolyhedronSocket]] -> PolyhedronMonad ()
-addRightWall sockets = do
-  let rightSurfTopLine = concat $ map (\s -> [socketVert 3 s, socketVert 2 s]) $ map last sockets
-  addSurface(rightSurfTopLine ++ reverse (map topToBottom rightSurfTopLine))
+addRightWall sockets = addWall 3 2 (map last sockets) id
 
 buildPlate :: [[Switch]] -> PolyhedronMonad ()
 buildPlate switches = do
@@ -186,11 +185,10 @@ renderVec (V.Vec x y z) = "[" ++ (show x) ++ ", " ++ (show y) ++ ", " ++ (show z
 renderSurface :: PolyhedronSurface -> String
 renderSurface xs = show xs
 
+-- It works only for polyhedron. Be careful not to pass bottom vertexes.
+-- Probably it should be a part of PolyhedronMonad.
 topToBottom :: Int -> Int
 topToBottom = (+ 4)
-
-sandwich :: [Int] -> [[Int]]
-sandwich xs = [xs, reverse $ map topToBottom xs]
 
 renderHoleCube :: Switch -> [String]
 renderHoleCube (Switch (V.Vec x y z) (V.Vec ax ay az)) = [
