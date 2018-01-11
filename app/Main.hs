@@ -161,8 +161,11 @@ switchHeight = 5
 holeWidth :: Double
 holeWidth = 14.3
 
-holeHeight :: Double
-holeHeight = 12
+holeNotchWidth :: Double
+holeNotchWidth = 1
+
+holeNotchHeight :: Double
+holeNotchHeight = 1.5
 
 keycapBottomWidth :: Double
 keycapBottomWidth = 19.05
@@ -191,15 +194,19 @@ topToBottom :: Int -> Int
 topToBottom = (+ 4)
 
 renderHoleCube :: Switch -> [String]
-renderHoleCube (Switch (V.Vec x y z) (V.Vec ax ay az)) = [
-  "translate(" ++ show [x, y, z] ++ ")"
-  , "rotate(" ++ show [ax, ay, az] ++ ")"
-  , "translate(" ++ show [-hw, -hw, -hh] ++ ")"
-  , "cube(" ++ show [holeWidth, holeWidth, holeHeight] ++ ");"
+renderHoleCube (Switch (V.Vec x y z) (V.Vec ax ay az)) = concat [
+  cube holeWidth holeWidth (-1)
+  , cube (holeWidth - holeNotchWidth) holeWidth (holeNotchHeight)
   ]
   where
-    hw = holeWidth / 2
-    hh = holeHeight / 2
+    -- cube switchWidth switchWidth switchHeight will exactly match occupy
+    -- switch space
+    cube len_x len_y dz = [
+      "translate(" ++ show [x, y, z] ++ ")"
+      , "rotate(" ++ show [ax, ay, az] ++ ")"
+      , "translate(" ++ show [-(len_x / 2), -(len_y / 2), -(switchHeight / 2) + dz] ++ ")"
+      , "cube(" ++ show [len_x, len_y, switchHeight] ++ ");"
+      ]
 
 renderKeycap :: Switch -> [String]
 renderKeycap (Switch (V.Vec x y z) (V.Vec ax ay az)) = [
