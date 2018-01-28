@@ -159,16 +159,16 @@ switchHeight :: Double
 switchHeight = 5
 
 holeWidth :: Double
-holeWidth = 14.3
+holeWidth = 13.94
 
 holeNotchWidth :: Double
-holeNotchWidth = 1
+holeNotchWidth = 0.5
 
 holeNotchHeight :: Double
 holeNotchHeight = 1.5
 
 keycapBottomWidth :: Double
-keycapBottomWidth = 19.05
+keycapBottomWidth = switchWidth
 
 keycapTopWidth :: Double
 keycapTopWidth = 14
@@ -195,17 +195,17 @@ topToBottom = (+ 4)
 
 renderHoleCube :: Switch -> [String]
 renderHoleCube (Switch (V.Vec x y z) (V.Vec ax ay az)) = concat [
-  cube holeWidth holeWidth (-1)
-  , cube (holeWidth - holeNotchWidth) holeWidth (holeNotchHeight)
+  cube holeWidth holeWidth (switchHeight + 2) (-1)
+  , cube holeWidth (holeWidth + 2 * holeNotchWidth) switchHeight (-holeNotchHeight)
   ]
   where
     -- cube switchWidth switchWidth switchHeight will exactly match occupy
     -- switch space
-    cube len_x len_y dz = [
+    cube len_x len_y len_z dz = [
       "translate(" ++ show [x, y, z] ++ ")"
       , "rotate(" ++ show [ax, ay, az] ++ ")"
       , "translate(" ++ show [-(len_x / 2), -(len_y / 2), -(switchHeight / 2) + dz] ++ ")"
-      , "cube(" ++ show [len_x, len_y, switchHeight] ++ ");"
+      , "cube(" ++ show [len_x, len_y, len_z] ++ ");"
       ]
 
 renderKeycap :: Switch -> [String]
@@ -340,10 +340,11 @@ thumbPlate = [
  ]
  ]
 
-withKeycaps :: Bool
-withKeycaps = False
+singleSocket :: [[Switch]]
+singleSocket = [[Switch (V.vec 0 0 0) (V.vec 0 0 0)]]
 
 main :: IO ()
 main = do withFile "main_plate.scad"  WriteMode  $ \h -> mapM_ (hPutStrLn h) (render mainPlate (Just mainEnvelop))
           withFile "main_plate2.scad" WriteMode  $ \h -> mapM_ (hPutStrLn h) (render mainPlate Nothing)
           withFile "thumb_plate.scad" WriteMode $ \h -> mapM_ (hPutStrLn h) (render thumbPlate Nothing)
+          withFile "single_socket.scad" WriteMode $ \h -> mapM_ (hPutStrLn h) (render singleSocket Nothing)
