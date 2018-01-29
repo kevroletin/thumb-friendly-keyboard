@@ -1,4 +1,4 @@
-module Keycaps (
+module Parts.Keycaps (
   buildKeycaps
 ) where
 

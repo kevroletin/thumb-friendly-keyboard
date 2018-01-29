@@ -2,7 +2,7 @@
    purpose is a smooth transition from curly shape to something regular like a
    parallelepiped.
 -}
-module Envelope (
+module Parts.Envelope (
   buildEnvelope
 ) where
 
@@ -10,6 +10,7 @@ import qualified Data.Glome.Vec as V
 import Keyboard
 import Config
 import ScadUtils
+import Parts.Common
 
 -- Connects plate with vertexes from envelope. Orientation of bottom paths is
 -- the same as corresponding top paths.

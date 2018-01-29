@@ -1,4 +1,4 @@
-module Plate (
+module Parts.Plate (
   buildPlate
 ) where
 
@@ -9,6 +9,7 @@ import Config
 import Keyboard
 import GeneralUtils
 import Data.Foldable
+import Parts.Common
 
 data PolyhedronSocket = PolyhedronSocket {
   socketVertIds :: [Int]

@@ -5,14 +5,13 @@ import qualified Data.Glome.Vec as V
 import qualified Data.List as List
 import Control.Monad.State
 import Data.Foldable
+
 import ScadUtils
 import Sandwidge
 import GeneralUtils
 import Keyboard
 import Config
-import Plate
-import Keycaps
-import Envelope
+import Parts
 
 -- We assume next view location:
 -- + x goes from left to right
@@ -92,15 +91,6 @@ test = let topSquare = [V.vec (-10) (-10) 50, V.vec (-10) 10 50,
            lower (V.Vec x y z) = V.vec x y (z - 3)
            lowerSquare = map lower topSquare
            in Sandwidge topSquare lowerSquare
-
-
-combineConvexShells a b = union [
-  intersection [a, b]
-  , difference [
-      union [a, b]
-      , intersection [hull [a], hull [b]]
-      ]
-  ]
 
 a = translate 10 10 10 $ block [buildSadwidge test
                                , projectionDown test
