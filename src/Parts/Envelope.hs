@@ -10,6 +10,7 @@ import qualified Data.Glome.Vec as V
 import Keyboard
 import Config
 import Scad
+import Scad.Builders
 import Parts.Common
 
 -- Connects plate with vertexes from envelope. Orientation of bottom paths is
@@ -48,4 +49,4 @@ buildEnvelope switches (Just envelope) = union [
     rigthWallBottom = (concat $ map (\x -> [x !! 7, x !! 6]) $ map switchVertexes (map last switches))
     leftWallTop     = (concat $ map (\x -> [x !! 1, x !! 0]) $ reverse $ map switchVertexes (map head switches))
     leftWallBottom  = (concat $ map (\x -> [x !! 5, x !! 4]) $ reverse $ map switchVertexes (map head switches))
-    lowerEnvelop = map (\(V.Vec x y z) -> V.Vec x y (z - envelopHeight))
+    lowerEnvelop = map (\(V.Vec x y z) -> V.vscaleadd (V.Vec x y z) (upDirection envelope) (-envelopHeight))

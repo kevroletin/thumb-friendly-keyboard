@@ -5,6 +5,7 @@ module Parts.Keycaps (
 import qualified Data.Glome.Vec as V
 import Keyboard
 import Scad
+import Scad.Builders
 import Config
 
 buildKeycap :: Switch -> ScadProgram

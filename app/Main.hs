@@ -7,6 +7,8 @@ import Control.Monad.State
 import Data.Foldable
 
 import Scad
+-- TODO: main shouldn't contain rendering logic, only configuration arrays
+import Scad.Builders
 import Scad.Sandwidge
 import GeneralUtils
 import Keyboard
@@ -19,7 +21,7 @@ import Parts
 
 buildFinalPart :: [[Switch]] -> Maybe Envelope -> String
 buildFinalPart switches envelope =
-  renderToString $ union [
+  renderToScad $ union [
           buildPlate switches
         , (buildKeycaps $ concat switches)
         , buildEnvelope switches envelope
@@ -58,6 +60,7 @@ mainEnvelop = Envelope {
   , back  = [V.vec (-20) (70) 10, V.vec 140 (70) 10]
   , left  = [head (front mainEnvelop), head (back mainEnvelop)]
   , right = [V.vec 140 (10) 10, last (back mainEnvelop)]
+  , upDirection = V.Vec 0 0 1
   }
 
 thumbPlate :: [[Switch]]

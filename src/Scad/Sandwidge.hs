@@ -7,6 +7,7 @@ module Scad.Sandwidge (
 
 import qualified Data.Glome.Vec as V
 import Scad
+import Scad.Builders
 import GeneralUtils
 
 data Sandwidge a = Sandwidge {

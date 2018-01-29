@@ -18,6 +18,6 @@ data Envelope = Envelope {
   left  :: [V.Vec],
   right :: [V.Vec],
   front :: [V.Vec],
-  back  :: [V.Vec]
+  back  :: [V.Vec],
+  upDirection :: V.Vec
   } deriving Show;
-
