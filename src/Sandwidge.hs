@@ -50,3 +50,12 @@ projectionDown s@(Sandwidge t0 b0) = union $
     t = sandwidgeMiddlePoints s
     b = map lower t
     lower (r, V.Vec x y z) = (r, V.Vec x y r)
+
+combineConvexShells :: ScadProgram -> ScadProgram -> ScadProgram
+combineConvexShells a b = union [
+  intersection [a, b]
+  , difference [
+      union [a, b]
+      , intersection [hull [a], hull [b]]
+      ]
+  ]
