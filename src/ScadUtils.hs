@@ -1,19 +1,20 @@
 module ScadUtils (
   ScadProgram
-  , render
-  , renderToString
-  , hull
-  , union
-  , difference
-  , cube
-  , translate
-  , rotate
-  , color
-  , dummyFigure
   , block
+  , color
+  , cube
+  , difference
+  , dummyFigure
+  , hull
+  , intersection
   , line
   , lineVarR
+  , render
+  , renderToString
+  , rotate
   , sphere
+  , translate
+  , union
 
   , PolyhedronSurface
   , PolyhedronMonad
@@ -120,6 +121,9 @@ hull xs = Operator "hull" NoParams (Block xs)
 
 union :: [ScadProgram] -> ScadProgram
 union xs = Operator "union" NoParams (Block xs)
+
+intersection :: [ScadProgram] -> ScadProgram
+intersection xs = Operator "intersection" NoParams (Block xs)
 
 difference :: [ScadProgram] -> ScadProgram
 difference xs = Operator "difference" NoParams (Block xs)

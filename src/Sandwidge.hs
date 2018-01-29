@@ -2,6 +2,7 @@ module Sandwidge (
   Sandwidge(..)
   , buildSadwidge
   , projectionDown
+  , combineConvexShells
 ) where
 
 import qualified Data.Glome.Vec as V
