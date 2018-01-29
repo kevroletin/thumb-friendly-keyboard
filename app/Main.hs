@@ -79,27 +79,8 @@ thumbPlate = [
 singleSocket :: [[Switch]]
 singleSocket = [[Switch (V.vec 0 0 0) (V.vec 0 0 0)]]
 
--- main :: IO ()
--- main = do withFile "main_plate.scad"  WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate (Just mainEnvelop)
---           withFile "main_plate2.scad" WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate Nothing
---           withFile "thumb_plate.scad" WriteMode $ \h -> hPutStrLn h $  buildFinalPart thumbPlate Nothing
---           withFile "single_socket.scad" WriteMode $ \h -> hPutStrLn h $ buildFinalPart singleSocket Nothing
-
-
-test = let topSquare = [V.vec (-10) (-10) 50, V.vec (-10) 10 50,
-                       V.vec 10 10 40,       V.vec 10 (-10) 40]
-           lower (V.Vec x y z) = V.vec x y (z - 3)
-           lowerSquare = map lower topSquare
-           in Sandwidge topSquare lowerSquare
-
-a = translate 10 10 10 $ block [buildSadwidge test
-                               , projectionDown test
-                               ]
-
-b = union [ buildSadwidge test
-          , projectionDown test
-          ]
-
-main = do withFile "test.scad" WriteMode $ \h ->
-            hPutStrLn h (renderToString $ combineConvexShells a b)
-            -- hPutStrLn h (renderToString test2)
+main :: IO ()
+main = do withFile "main_plate.scad"  WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate (Just mainEnvelop)
+          withFile "main_plate2.scad" WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate Nothing
+          withFile "thumb_plate.scad" WriteMode $ \h -> hPutStrLn h $  buildFinalPart thumbPlate Nothing
+          withFile "single_socket.scad" WriteMode $ \h -> hPutStrLn h $ buildFinalPart singleSocket Nothing
