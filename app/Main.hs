@@ -6,6 +6,8 @@ import qualified Data.List as List
 import Control.Monad.State
 import Data.Foldable
 import ScadUtils
+import Sandwidge
+import GeneralUtils
 
 -- We assume next view location:
 -- + x goes from left to right
@@ -71,21 +73,6 @@ addFrontToBackSurf n f =
 addMiddleSurf :: PolyhedronSocket -> PolyhedronSocket -> PolyhedronSocket -> PolyhedronSocket -> PolyhedronMonad ()
 addMiddleSurf s0 s1 s2 s3 =
   addSurfaceSandwich [socketVert 2 s0, socketVert 3 s1, socketVert 0 s2, socketVert 1 s3]
-
-pairs :: [a] -> [(a, a)]
-pairs [] = []
-pairs xs = drop 2 $ scanl (\(_, b) c -> (b, c)) (head xs, head xs) xs
-
-eachSquare :: [[a]]
-           -> (a -> a -> a -> a -> PolyhedronMonad b)
-           -> PolyhedronMonad ()
-eachSquare sockets f = do
-  for_ [0 .. (height - 2)] $ \y' ->
-    for_ [0 .. (width - 2)] $ \x' -> do
-        f (sockets !! y' !! x') (sockets !! (y' + 1) !! x') (sockets !! (y' + 1) !! (x' + 1)) (sockets !! y' !! (x' + 1))
-  where
-    width = length (head sockets)
-    height = length sockets
 
 addWall :: Int -> Int -> [PolyhedronSocket] -> (PolyhedronSurface -> PolyhedronSurface) -> PolyhedronMonad ()
 addWall a b xs f = do

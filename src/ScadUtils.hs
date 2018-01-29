@@ -11,6 +11,9 @@ module ScadUtils (
   , color
   , dummyFigure
   , block
+  , line
+  , lineVarR
+  , sphere
 
   , PolyhedronSurface
   , PolyhedronMonad
@@ -18,12 +21,15 @@ module ScadUtils (
   , addSurface
   , getCurrentPolyhedron
   , buildPolyhedron
-
+  -- TODO: make general and move out from this module
+  , eachSquare
 ) where
 
 import           Control.Monad.State
 import qualified Data.Glome.Vec      as V
 import qualified Data.List           as List
+import           Data.Foldable
+import           GeneralUtils
 
 type PolyhedronSurface = [Int]
 
@@ -43,7 +49,19 @@ data ScadProgram =
   | Cube V.Vec
   | Block [ScadProgram]
   | Operator String OperatorParams ScadProgram
+  | Sphere { sphereRadius :: Double }
   deriving Show
+
+eachSquare :: [[a]]
+           -> (a -> a -> a -> a -> PolyhedronMonad b)
+           -> PolyhedronMonad ()
+eachSquare sockets f = do
+  for_ [0 .. (height - 2)] $ \y' ->
+    for_ [0 .. (width - 2)] $ \x' -> do
+        f (sockets !! y' !! x') (sockets !! (y' + 1) !! x') (sockets !! (y' + 1) !! (x' + 1)) (sockets !! y' !! (x' + 1))
+  where
+    width = length (head sockets)
+    height = length sockets
 
 isBlcok :: ScadProgram -> Bool
 isBlcok (Block _) = True
@@ -83,7 +101,7 @@ render (Polyhedron verts faces) =
   , List.intercalate ",\n" (map renderSurface faces)
   , "]);"
   ]
-render (Cube pos) = ["cube(" ++ renderVec pos ++ ");"]
+render (Cube dim) = ["cube(" ++ renderVec dim ++ ");"]
 render (Operator name params child) =
   if isBlcok child
     then (title ++ " {") : render child ++ ["};"]
@@ -92,6 +110,7 @@ render (Operator name params child) =
         paramsStr (VecParams v) = renderVec v
         title = (name ++ "(" ++ (paramsStr params) ++ ")")
 render (Block childs) = concatMap render childs
+render (Sphere r) = ["sphere(" ++ show r ++ ");"]
 
 renderToString :: ScadProgram -> [Char]
 renderToString = (List.intercalate "\n") . render
@@ -105,11 +124,15 @@ union xs = Operator "union" NoParams (Block xs)
 difference :: [ScadProgram] -> ScadProgram
 difference xs = Operator "difference" NoParams (Block xs)
 
+-- todo: add initial translation and rotation into this api
 cube :: V.Flt -> V.Flt -> V.Flt -> ScadProgram
 cube x y z = Cube (V.Vec x y z)
 
 translate :: V.Flt -> V.Flt -> V.Flt -> ScadProgram -> ScadProgram
 translate x y z = Operator "translate" (VecParams $ V.Vec x y z)
+
+translateV :: V.Vec -> ScadProgram -> ScadProgram
+translateV shift = Operator "translate" (VecParams shift)
 
 rotate :: V.Flt -> V.Flt -> V.Flt -> ScadProgram -> ScadProgram
 rotate x y z =  Operator "rotate" (VecParams $ V.Vec x y z)
@@ -122,3 +145,17 @@ dummyFigure = Block []
 
 block :: [ScadProgram] -> ScadProgram
 block = Block
+
+sphere :: Double -> V.Vec -> ScadProgram
+sphere r pos = translateV pos $ Sphere r
+
+line :: Double -> [V.Vec] -> ScadProgram
+line r xs = let pairs = xs `zip` (tail xs)
+                segment (a, b) = hull [sphere r a, sphere r b]
+            in union $ map segment pairs
+
+lineVarR :: [(Double, V.Vec)] -> ScadProgram
+lineVarR xs = let pairs = xs `zip` (tail xs)
+                  segment ((ra, a), (rb, b)) =
+                    hull [sphere ra a, sphere rb b]
+              in union $ map segment pairs
