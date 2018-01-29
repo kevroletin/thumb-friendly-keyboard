@@ -9,7 +9,7 @@ module Parts.Envelope (
 import qualified Data.Glome.Vec as V
 import Keyboard
 import Config
-import ScadUtils
+import Scad
 import Parts.Common
 
 -- Connects plate with vertexes from envelope. Orientation of bottom paths is

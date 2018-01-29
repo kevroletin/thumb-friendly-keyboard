@@ -1,4 +1,4 @@
-module Sandwidge (
+module Scad.Sandwidge (
   Sandwidge(..)
   , buildSadwidge
   , projectionDown
@@ -6,7 +6,7 @@ module Sandwidge (
 ) where
 
 import qualified Data.Glome.Vec as V
-import ScadUtils
+import Scad
 import GeneralUtils
 
 data Sandwidge a = Sandwidge {

@@ -6,8 +6,8 @@ import qualified Data.List as List
 import Control.Monad.State
 import Data.Foldable
 
-import ScadUtils
-import Sandwidge
+import Scad
+import Scad.Sandwidge
 import GeneralUtils
 import Keyboard
 import Config

@@ -4,7 +4,7 @@ module Parts.Plate (
 
 import qualified Data.Glome.Vec as V
 import qualified Data.List as List
-import ScadUtils
+import Scad
 import Config
 import Keyboard
 import GeneralUtils
