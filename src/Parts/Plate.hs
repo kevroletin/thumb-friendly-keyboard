@@ -28,7 +28,7 @@ data PolyhedronSocket = PolyhedronSocket {
 socketVert :: Int -> PolyhedronSocket -> Int
 socketVert n (PolyhedronSocket xs) = xs !! n
 
-addSurfaceSandwich :: PolyhedronSurface -> PolyhedronMonad ()
+addSurfaceSandwich ::PolyhedronSurface -> PolyhedronMonad ()
 addSurfaceSandwich v = do addSurface v
                           addSurface (reverse $ map topToBottom v)
 
@@ -92,20 +92,8 @@ buildPlateBody switches = buildPolyhedron $ do
 topToBottom :: Int -> Int
 topToBottom = (+ 4)
 
-buildHoleCube :: Switch -> ScadProgram
-buildHoleCube (Switch ts) = transformBySeq ts $ block [
-  cube' holeWidth holeWidth (switchHeight + 2) (-1)
-  , cube' holeWidth (holeWidth + 2 * holeNotchWidth) switchHeight (-holeNotchHeight)
-  ]
-  where
-    -- cube switchWidth switchWidth switchHeight will exactly match occupy
-    -- switch space
-    cube' len_x len_y len_z dz =
-      translate (-len_x / 2) (-len_y / 2) (-switchHeight / 2 + dz) $
-      cube len_x len_y len_z
-
 buildHoles :: [Switch] -> ScadProgram
-buildHoles switches = union (map buildHoleCube switches)
+buildHoles switches = union (map buildSwitchHole switches)
 
 buildPlate :: Plate -> ScadProgram
 buildPlate switches = difference [ buildPlateBody switches
