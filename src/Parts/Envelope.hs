@@ -19,6 +19,7 @@ import Scad.Builders
 import Parts.Switch
 import Scad.Sandwidge
 import Parts.Plate
+import Transformation
 
 data Envelope = Envelope {
   left  :: [V.Vec],
@@ -28,9 +29,19 @@ data Envelope = Envelope {
   upDirection :: V.Vec
   } deriving Show;
 
--- Connects plate with vertexes from envelope. Assumes that orientation of
--- bottom paths is the same as corresponding top paths. plateTop -> plateBottom
--- -> envelopeTop -> envelopeBottom
+instance Transformable Envelope where
+  transform = transformEnvelope
+
+transformEnvelope :: Transformation -> Envelope -> Envelope
+transformEnvelope tr0 (Envelope l r f b u) =
+  Envelope (t l) (t r) (t f) (t b) (rotateOnly u)
+  where
+    t = map (transform tr0)
+    rotateOnly :: V.Vec -> V.Vec
+    rotateOnly = case tr0 of
+      tr@(Rotate _) -> transform tr
+      _             ->id
+
 buildEnvelopePart
   :: Sandwidge V.Vec -> Sandwidge V.Vec -> ScadProgram
 buildEnvelopePart (Sandwidge pt pb) (Sandwidge et eb) = buildPolyhedron $
