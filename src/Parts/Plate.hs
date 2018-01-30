@@ -21,53 +21,57 @@ import Scad.Sandwidge
 
 type Plate = [[Switch]]
 
-data PolyhedronSocket = PolyhedronSocket {
+{-|Parallelepiped where we create hole to turn it into a socket for a key. It
+  contains 8 "vertexes". But since it is supposed to be used within a polyhedron
+  instead of actual coordinates it holds ids.
+-}
+data SocketBar = SocketBar {
   socketVertIds :: [Int]
   } deriving Show
 
-socketVert :: Int -> PolyhedronSocket -> Int
-socketVert n (PolyhedronSocket xs) = xs !! n
+socketVert :: Int -> SocketBar -> Int
+socketVert n (SocketBar xs) = xs !! n
 
 addSurfaceSandwich ::PolyhedronSurface -> PolyhedronMonad ()
 addSurfaceSandwich v = do addSurface v
                           addSurface (reverse $ map topToBottom v)
 
-addSwitch :: Switch -> PolyhedronMonad PolyhedronSocket
-addSwitch switch = fmap PolyhedronSocket $ mapM addVertex (switchVertexes switch)
+addSwitch :: Switch -> PolyhedronMonad SocketBar
+addSwitch switch = fmap SocketBar $ mapM addVertex (switchVertexes switch)
 
-addTopBottomSurf :: PolyhedronSocket -> PolyhedronMonad ()
+addTopBottomSurf :: SocketBar -> PolyhedronMonad ()
 addTopBottomSurf sw =
   addSurfaceSandwich $ map (socketVertIds sw !!) [0, 1, 2, 3]
 
-addLeftToRightSurf :: PolyhedronSocket -> PolyhedronSocket -> PolyhedronMonad ()
+addLeftToRightSurf :: SocketBar -> SocketBar -> PolyhedronMonad ()
 addLeftToRightSurf l r =
   addSurfaceSandwich [socketVert 1 r, socketVert 0 r, socketVert 3 l, socketVert 2 l]
 
-addFrontToBackSurf :: PolyhedronSocket -> PolyhedronSocket -> PolyhedronMonad ()
+addFrontToBackSurf :: SocketBar -> SocketBar -> PolyhedronMonad ()
 addFrontToBackSurf n f =
   addSurfaceSandwich [socketVert 1 n, socketVert 0 f, socketVert 3 f, socketVert 2 n]
 
-addMiddleSurf :: PolyhedronSocket -> PolyhedronSocket -> PolyhedronSocket -> PolyhedronSocket -> PolyhedronMonad ()
+addMiddleSurf :: SocketBar -> SocketBar -> SocketBar -> SocketBar -> PolyhedronMonad ()
 addMiddleSurf s0 s1 s2 s3 =
   addSurfaceSandwich [socketVert 2 s0, socketVert 3 s1, socketVert 0 s2, socketVert 1 s3]
 
-addWall :: Int -> Int -> [PolyhedronSocket] -> (PolyhedronSurface -> PolyhedronSurface) -> PolyhedronMonad ()
+addWall :: Int -> Int -> [SocketBar] -> (PolyhedronSurface -> PolyhedronSurface) -> PolyhedronMonad ()
 addWall a b xs f = do
   let topLine    = concat $ map (\s -> [socketVert a s, socketVert b s]) xs
   let bottomLine = concat $ map (\s -> [socketVert (topToBottom b) s, socketVert (topToBottom a) s]) (reverse xs)
   let res = topLine ++ bottomLine
   addSurface(f res)
 
-addFrontWall :: [[PolyhedronSocket]] -> PolyhedronMonad ()
+addFrontWall :: [[SocketBar]] -> PolyhedronMonad ()
 addFrontWall sockets = addWall 0 3 (head sockets) id
 
-addBackWall :: [[PolyhedronSocket]] -> PolyhedronMonad ()
+addBackWall :: [[SocketBar]] -> PolyhedronMonad ()
 addBackWall sockets = addWall 1 2 (last sockets) reverse
 
-addLeftWall :: [[PolyhedronSocket]] -> PolyhedronMonad ()
+addLeftWall :: [[SocketBar]] -> PolyhedronMonad ()
 addLeftWall sockets = addWall 0 1 (map head sockets) reverse
 
-addRightWall :: [[PolyhedronSocket]] -> PolyhedronMonad ()
+addRightWall :: [[SocketBar]] -> PolyhedronMonad ()
 addRightWall sockets = addWall 3 2 (map last sockets) id
 
 buildPlateBody :: [[Switch]] -> ScadProgram
