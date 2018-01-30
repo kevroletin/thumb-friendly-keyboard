@@ -16,17 +16,18 @@ import Config
 import Parts
 import Transformation
 import Parts.Switch
+import Parts.Envelope
 
 -- We assume next view location:
 -- + x goes from left to right
 -- + y goes from "near" to "far"
 
 buildFinalPart :: [[Switch]] -> Maybe Envelope -> String
-buildFinalPart switches e =
+buildFinalPart switches envelope =
   renderToScad $ union [
           buildPlate switches
         , (buildKeycaps $ concat switches)
-        , buildEnvelope switches e
+        , buildEnvelope switches envelope
         ]
 
 mainPlate :: [[Switch]]

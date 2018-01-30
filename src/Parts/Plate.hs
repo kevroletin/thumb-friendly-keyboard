@@ -1,5 +1,10 @@
 module Parts.Plate (
-  buildPlate
+  Plate
+  , buildPlate
+  , plateFrontWall
+  , plateBackWall
+  , plateRightWall
+  , plateLeftWall
 ) where
 
 import qualified Data.Glome.Vec as V
@@ -12,6 +17,9 @@ import GeneralUtils
 import Data.Foldable
 import Parts.Switch
 import Transformation
+import Scad.Sandwidge
+
+type Plate = [[Switch]]
 
 data PolyhedronSocket = PolyhedronSocket {
   socketVertIds :: [Int]
@@ -84,7 +92,6 @@ buildPlateBody switches = buildPolyhedron $ do
 topToBottom :: Int -> Int
 topToBottom = (+ 4)
 
-
 buildHoleCube :: Switch -> ScadProgram
 buildHoleCube (Switch ts) = transformBySeq ts $ block [
   cube' holeWidth holeWidth (switchHeight + 2) (-1)
@@ -100,5 +107,28 @@ buildHoleCube (Switch ts) = transformBySeq ts $ block [
 buildHoles :: [Switch] -> ScadProgram
 buildHoles switches = union (map buildHoleCube switches)
 
+buildPlate :: Plate -> ScadProgram
 buildPlate switches = difference [ buildPlateBody switches
                                  , buildHoles $ concat switches]
+
+-- TODO: this functions are similar to add* functions used
+-- with polyhedron monad. Refactor to use same logic.
+plateFrontWall :: Plate -> Sandwidge V.Vec
+plateFrontWall plate = Sandwidge
+  (concat $ map (\x -> [x !! 0, x !! 3]) $ map switchVertexes (head plate))
+  (concat $ map (\x -> [x !! 4, x !! 7]) $ map switchVertexes (head plate))
+
+plateBackWall :: Plate -> Sandwidge V.Vec
+plateBackWall plate = Sandwidge
+  (concat $ map (\x -> [x !! 2, x !! 1]) $ reverse $ map switchVertexes (last plate))
+  (concat $ map (\x -> [x !! 6, x !! 5]) $ reverse $ map switchVertexes (last plate))
+
+plateRightWall :: Plate -> Sandwidge V.Vec
+plateRightWall plate = Sandwidge
+  (concat $ map (\x -> [x !! 3, x !! 2]) $ map switchVertexes (map last plate))
+  (concat $ map (\x -> [x !! 7, x !! 6]) $ map switchVertexes (map last plate))
+
+plateLeftWall :: Plate -> Sandwidge V.Vec
+plateLeftWall plate = Sandwidge
+  (concat $ map (\x -> [x !! 1, x !! 0]) $ reverse $ map switchVertexes (map head plate))
+  (concat $ map (\x -> [x !! 5, x !! 4]) $ reverse $ map switchVertexes (map head plate))
