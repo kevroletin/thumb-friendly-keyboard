@@ -10,7 +10,8 @@ import Config
 import Keyboard
 import GeneralUtils
 import Data.Foldable
-import Parts.Common
+import Parts.Switch
+import Transformation
 
 data PolyhedronSocket = PolyhedronSocket {
   socketVertIds :: [Int]
@@ -85,7 +86,7 @@ topToBottom = (+ 4)
 
 
 buildHoleCube :: Switch -> ScadProgram
-buildHoleCube (Switch (V.Vec x y z) (V.Vec ax ay az)) = union [
+buildHoleCube (Switch ts) = transformBySeq ts $ block [
   cube' holeWidth holeWidth (switchHeight + 2) (-1)
   , cube' holeWidth (holeWidth + 2 * holeNotchWidth) switchHeight (-holeNotchHeight)
   ]
@@ -93,8 +94,6 @@ buildHoleCube (Switch (V.Vec x y z) (V.Vec ax ay az)) = union [
     -- cube switchWidth switchWidth switchHeight will exactly match occupy
     -- switch space
     cube' len_x len_y len_z dz =
-      translate x y z $
-      rotate ax ay az $
       translate (-len_x / 2) (-len_y / 2) (-switchHeight / 2 + dz) $
       cube len_x len_y len_z
 

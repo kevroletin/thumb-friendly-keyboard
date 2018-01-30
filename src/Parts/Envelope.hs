@@ -11,7 +11,7 @@ import Keyboard
 import Config
 import Scad
 import Scad.Builders
-import Parts.Common
+import Parts.Switch
 
 -- Connects plate with vertexes from envelope. Orientation of bottom paths is
 -- the same as corresponding top paths.
