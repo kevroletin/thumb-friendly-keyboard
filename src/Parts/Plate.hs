@@ -5,6 +5,7 @@ module Parts.Plate (
   , plateBackWall
   , plateRightWall
   , plateLeftWall
+  , platePerimeter
 ) where
 
 import qualified Data.Glome.Vec as V
@@ -18,6 +19,7 @@ import Data.Foldable
 import Parts.Switch
 import Transformation
 import Scad.Sandwidge
+import Data.Monoid
 
 type Plate = [[Switch]]
 
@@ -124,3 +126,7 @@ plateLeftWall :: Plate -> Sandwidge V.Vec
 plateLeftWall plate = Sandwidge
   (concat $ map (\x -> [x !! 1, x !! 0]) $ reverse $ map switchVertexes (map head plate))
   (concat $ map (\x -> [x !! 5, x !! 4]) $ reverse $ map switchVertexes (map head plate))
+
+platePerimeter :: Plate -> Sandwidge V.Vec
+platePerimeter p =
+  plateFrontWall p <> plateRightWall p <> plateBackWall p <> plateLeftWall p

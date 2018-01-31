@@ -17,18 +17,29 @@ import Parts
 import Transformation
 import Parts.Switch
 import Parts.Envelope
+import Parts.Plate
+import qualified Scad.SphereConnectors as Sp
 
 -- We assume next view location:
 -- + x goes from left to right
 -- + y goes from "near" to "far"
 
 buildFinalPart :: [[Switch]] -> Maybe Envelope -> String
-buildFinalPart switches envelope =
+buildFinalPart switches0 envelope =
   renderToScad $ union [
           buildPlate switches
+        -- , projectionDown (platePerimeter switches)
         , (buildKeycaps $ concat switches)
-        , buildEnvelope switches envelope
+        -- , buildEnvelope (fmap (fmap tr) switches) (fmap tr envelope)
         ]
+  where
+    tr x = transformBySeq [ Translate (V.Vec 0 0 80)
+                          , Rotate (V.Vec 10 10 0)] x
+    switches = fmap (fmap tr) switches0
+    -- tr = id
+        -- tr1 = transformBySeq [
+        --   Rotate (V.Vec 45 45 0)
+        --   ]
 
 mainPlate :: [[Switch]]
 mainPlate = [
@@ -85,8 +96,40 @@ thumbPlate = [
 singleSocket :: [[Switch]]
 singleSocket = [[switch (V.vec 0 0 0) (V.vec 0 0 0)]]
 
+test :: String
+test =
+  renderToScad $ union [
+          buildPlate switches
+        -- , projectionDown (platePerimeter )
+        -- , (buildKeycaps $ concat switches)
+        , buildPlate pad
+
+        , Sp.line 2.5 (init $ sandwidgeMiddle (plateFrontWall switches))
+        , Sp.line 2.5 (init $ sandwidgeMiddle (plateLeftWall pad))
+
+        , block $ Sp.connectPaths 2.5
+          (init $ sandwidgeMiddle (plateFrontWall switches))
+          (reverse $ init $ sandwidgeMiddle (plateLeftWall pad))
+        -- , buildEnvelope (fmap (fmap tr) switches) (fmap tr envelope)
+        ]
+  where
+    tr x = transformBySeq [ Translate (V.Vec (-50) 0 0)
+                          , Rotate (V.Vec (0) (-45) 0)] x
+    switches = fmap (fmap tr) mainPlate
+
+    tr2 x = transformBySeq [ Translate (V.Vec (-10) (-40) 30)
+                           , Rotate (V.Vec (50) (0) (0))
+                           , Rotate (V.Vec (0) (0) (-40))
+                           ] x
+    pad = fmap (fmap tr2) thumbPlate
+    -- tr = id
+        -- tr1 = transformBySeq [
+        --   Rotate (V.Vec 45 45 0)
+        --   ]
+
 main :: IO ()
-main = do withFile "main_plate.scad"  WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate (Just mainEnvelop)
-          withFile "main_plate2.scad" WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate Nothing
-          withFile "thumb_plate.scad" WriteMode $ \h -> hPutStrLn h $  buildFinalPart thumbPlate Nothing
-          withFile "single_socket.scad" WriteMode $ \h -> hPutStrLn h $ buildFinalPart singleSocket Nothing
+main = do writeFile "test.scad" test
+          --withFile "main_plate.scad"  WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate (Just mainEnvelop)
+          -- withFile "main_plate2.scad" WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate Nothing
+          -- withFile "thumb_plate.scad" WriteMode $ \h -> hPutStrLn h $  buildFinalPart thumbPlate Nothing
+          -- withFile "single_socket.scad" WriteMode $ \h -> hPutStrLn h $ buildFinalPart singleSocket Nothing
