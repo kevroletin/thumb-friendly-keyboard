@@ -2,6 +2,7 @@ module Scad.Builders (
   block
   , color
   , cube
+  , cube0
   , difference
   , dummyFigure
   , hull
@@ -74,9 +75,11 @@ intersection xs = Operator "intersection" NoParams (Block xs)
 difference :: [ScadProgram] -> ScadProgram
 difference xs = Operator "difference" NoParams (Block xs)
 
--- todo: add initial translation and rotation into this api
 cube :: V.Flt -> V.Flt -> V.Flt -> ScadProgram
 cube x y z = Cube (V.Vec x y z)
+
+cube0 :: V.Flt -> V.Flt -> V.Flt -> ScadProgram
+cube0 x y z = translate (-x/2) (-y/2) (-z/2) $ Cube (V.Vec x y z)
 
 translate :: V.Flt -> V.Flt -> V.Flt -> ScadProgram -> ScadProgram
 translate x y z = Operator "translate" (VecParams $ V.Vec x y z)

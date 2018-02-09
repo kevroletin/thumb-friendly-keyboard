@@ -17,7 +17,7 @@ buildKeycap (Switch ts) =
       translate (-hbw) (-hbw) keycapElevation $
         cube keycapBottomWidth keycapBottomWidth 1
       , translate (-htw) (-htw) (keycapElevation + keycapHeight) $
-          cube keycapTopWidth keycapTopWidth 1
+        cube keycapTopWidth keycapTopWidth 1
   ]
   where
     hbw = keycapBottomWidth / 2

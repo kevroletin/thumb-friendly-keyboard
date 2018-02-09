@@ -66,10 +66,10 @@ connectPaths' r (x0 : x1 : xs) (y0 : y1 : ys) =
   ++ connectPaths' r (x1 : xs) (y1 : ys)
 connectPaths' _ _ _ = []
 
-connectPaths :: Double -> Path -> Path -> [ScadProgram]
+connectPaths :: Double -> Path -> Path -> ScadProgram
 connectPaths r xs0 ys0 =
   let (xs, ys) = splitPathsIntoProportionalSegments xs0 ys0
-  in connectPaths' r xs ys
+  in union $ connectPaths' r xs ys
 
 line :: Double -> Path -> ScadProgram
 line r xs = let pairs = xs `zip` (tail xs)

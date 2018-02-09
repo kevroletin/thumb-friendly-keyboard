@@ -43,8 +43,8 @@ transformEnvelope tr0 (Envelope l r f b u) =
       _             ->id
 
 buildEnvelopePart
-  :: Sandwidge V.Vec -> Sandwidge V.Vec -> ScadProgram
-buildEnvelopePart (Sandwidge pt pb) (Sandwidge et eb)
+  :: Wall V.Vec -> Wall V.Vec -> ScadProgram
+buildEnvelopePart (Wall pt pb) (Wall et eb)
   | any null [pt, pb, et, eb] = dummyFigure
   | otherwise = buildPolyhedron $
   do pt'<- mapM addVertex pt
@@ -66,20 +66,21 @@ translateEnvelopLine :: Envelope -> [V.Vec] -> [V.Vec]
 translateEnvelopLine envelope =
   map (\(V.Vec x y z) -> V.vscaleadd (V.Vec x y z) (upDirection envelope) (-envelopHeight))
 
-envelopeFrontWall :: Envelope -> Sandwidge V.Vec
-envelopeFrontWall envelope = Sandwidge
+envelopeFrontWall :: Envelope -> Wall V.Vec
+envelopeFrontWall envelope = Wall
   (front envelope) (translateEnvelopLine envelope $ front envelope)
 
-envelopeBackWall :: Envelope -> Sandwidge V.Vec
-envelopeBackWall e = Sandwidge
+envelopeBackWall :: Envelope -> Wall V.Vec
+envelopeBackWall e = Wall
   (reverse $ back e) (reverse $ translateEnvelopLine e $ back e)
 
-envelopeRightWall :: Envelope -> Sandwidge V.Vec
-envelopeRightWall e = Sandwidge (right e) (translateEnvelopLine e $ right e)
+envelopeRightWall :: Envelope -> Wall V.Vec
+envelopeRightWall e = Wall (right e) (translateEnvelopLine e $ right e)
 
-envelopeLeftWall :: Envelope -> Sandwidge V.Vec
-envelopeLeftWall e = Sandwidge (reverse $ left e) (reverse $ translateEnvelopLine e $ left e)
+envelopeLeftWall :: Envelope -> Wall V.Vec
+envelopeLeftWall e = Wall (reverse $ left e) (reverse $ translateEnvelopLine e $ left e)
 
+-- TODO: remove maybe from type signature
 buildEnvelope :: Plate -> Maybe Envelope -> ScadProgram
 buildEnvelope _ Nothing = dummyFigure
 buildEnvelope p (Just e) = union [

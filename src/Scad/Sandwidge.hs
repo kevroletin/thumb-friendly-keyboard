@@ -1,8 +1,10 @@
 module Scad.Sandwidge (
   Sandwidge(..)
+  , Wall(..)
   , buildSadwidge
   , sandwidgeMiddleWithR
   , sandwidgeMiddle
+  , wallMiddle
 ) where
 
 import qualified Data.Glome.Vec as V
@@ -13,15 +15,22 @@ import GeneralUtils
 import Data.Monoid
 import Scad.Path
 
+-- Sandwidge is looped
 data Sandwidge a = Sandwidge {
   sandwidgeTopPlane :: [a]
   , sandwidgeBottomPlane :: [a]
   } deriving Show
 
-instance Monoid (Sandwidge a) where
-  mempty = Sandwidge [] []
-  mappend (Sandwidge a b) (Sandwidge c d) =
-    Sandwidge (a `mappend` c) (b `mappend` d)
+-- Wall is not looped
+data Wall a = Wall {
+  wallTopPlane :: [a]
+  , wallBottomPlane :: [a]
+  } deriving Show
+
+instance Monoid (Wall a) where
+  mempty = Wall [] []
+  mappend (Wall a b) (Wall c d) =
+    Wall (a `mappend` c) (b `mappend` d)
 
 buildSadwidge (Sandwidge t0 b0) = buildPolyhedron $ do
   t <- mapM addVertex t0
@@ -40,3 +49,7 @@ sandwidgeMiddleWithR (Sandwidge t0 b0) =
 sandwidgeMiddle :: Sandwidge V.Vec -> [V.Vec]
 sandwidgeMiddle (Sandwidge t0 b0) =
   zipWith segmentMiddlePoint (t0 ++ [head t0]) (b0 ++ [head b0])
+
+wallMiddle :: Wall V.Vec -> [V.Vec]
+wallMiddle (Wall t0 b0) =
+  zipWith segmentMiddlePoint t0 b0

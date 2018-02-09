@@ -107,26 +107,26 @@ buildPlate switches = difference [ buildPlateBody switches
 
 -- TODO: this functions are similar to add* functions used
 -- with polyhedron monad. Refactor to use same logic.
-plateFrontWall :: Plate -> Sandwidge V.Vec
-plateFrontWall plate = Sandwidge
+plateFrontWall :: Plate -> Wall V.Vec
+plateFrontWall plate = Wall
   (concat $ map (\x -> [x !! 0, x !! 3]) $ map switchVertexes (head plate))
   (concat $ map (\x -> [x !! 4, x !! 7]) $ map switchVertexes (head plate))
 
-plateBackWall :: Plate -> Sandwidge V.Vec
-plateBackWall plate = Sandwidge
+plateBackWall :: Plate -> Wall V.Vec
+plateBackWall plate = Wall
   (concat $ map (\x -> [x !! 2, x !! 1]) $ reverse $ map switchVertexes (last plate))
   (concat $ map (\x -> [x !! 6, x !! 5]) $ reverse $ map switchVertexes (last plate))
 
-plateRightWall :: Plate -> Sandwidge V.Vec
-plateRightWall plate = Sandwidge
+plateRightWall :: Plate -> Wall V.Vec
+plateRightWall plate = Wall
   (concat $ map (\x -> [x !! 3, x !! 2]) $ map switchVertexes (map last plate))
   (concat $ map (\x -> [x !! 7, x !! 6]) $ map switchVertexes (map last plate))
 
-plateLeftWall :: Plate -> Sandwidge V.Vec
-plateLeftWall plate = Sandwidge
+plateLeftWall :: Plate -> Wall V.Vec
+plateLeftWall plate = Wall
   (concat $ map (\x -> [x !! 1, x !! 0]) $ reverse $ map switchVertexes (map head plate))
   (concat $ map (\x -> [x !! 5, x !! 4]) $ reverse $ map switchVertexes (map head plate))
 
-platePerimeter :: Plate -> Sandwidge V.Vec
+platePerimeter :: Plate -> Wall V.Vec
 platePerimeter p =
   plateFrontWall p <> plateRightWall p <> plateBackWall p <> plateLeftWall p
