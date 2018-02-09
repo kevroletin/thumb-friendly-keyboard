@@ -44,7 +44,9 @@ transformEnvelope tr0 (Envelope l r f b u) =
 
 buildEnvelopePart
   :: Sandwidge V.Vec -> Sandwidge V.Vec -> ScadProgram
-buildEnvelopePart (Sandwidge pt pb) (Sandwidge et eb) = buildPolyhedron $
+buildEnvelopePart (Sandwidge pt pb) (Sandwidge et eb)
+  | any null [pt, pb, et, eb] = dummyFigure
+  | otherwise = buildPolyhedron $
   do pt'<- mapM addVertex pt
      et'<- mapM addVertex et
      pb'<- mapM addVertex pb
