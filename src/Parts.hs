@@ -7,3 +7,4 @@ module Parts (
 import Parts.Keycaps
 import Parts.Plate
 import Parts.Envelope
+import Parts.Switch

@@ -3,15 +3,16 @@ module Parts.Keycaps (
 ) where
 
 import qualified Data.Glome.Vec as V
+import Config
 import Keyboard
 import Scad
 import Scad.Builders
-import Config
+import Transformation
+import Parts.Switch
 
 buildKeycap :: Switch -> ScadProgram
-buildKeycap (Switch (V.Vec x y z) (V.Vec ax ay az)) =
-  translate x y z $
-  rotate ax ay az $
+buildKeycap (Switch ts) =
+  transformBySeq ts $
   hull [
       translate (-hbw) (-hbw) keycapElevation $
         cube keycapBottomWidth keycapBottomWidth 1
