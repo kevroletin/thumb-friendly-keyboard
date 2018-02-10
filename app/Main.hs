@@ -17,6 +17,7 @@ import Parts
 import Transformation
 import Parts.Switch
 import Parts.Envelope
+import Parts.RectEnvelope
 import Parts.Plate
 import qualified Scad.SphereConnectors as Sp
 
@@ -24,25 +25,26 @@ import qualified Scad.SphereConnectors as Sp
 -- + x goes from left to right
 -- + y goes from "near" to "far"
 
-buildFinalPart :: [[Switch]] -> Maybe Envelope -> String
-buildFinalPart switches0 envelope =
-  renderToScad $ union [
-          buildPlate switches
-        -- , projectionDown (platePerimeter switches)
-        , (buildKeycaps $ concat switches)
-        -- , buildEnvelope (fmap (fmap tr) switches) (fmap tr envelope)
-        ]
+buildFinalPart :: [[Switch]] -> Maybe Envelope -> Maybe (Double, Double)
+               -> String
+buildFinalPart switches envelope rectEnvelope =
+  renderToScad $ difference [
+    union [
+            buildPlate switches
+          , (buildKeycaps $ concat switches)
+          , buildEnvelope switches envelope
+          , doRectEnvelope rectEnvelope
+          ]
+    , buildHoles switches
+    ]
   where
-    tr x = transformBySeq [ Translate (V.Vec 0 0 80)
-                          , Rotate (V.Vec 10 10 0)] x
-    switches = fmap (fmap tr) switches0
-    -- tr = id
-        -- tr1 = transformBySeq [
-        --   Rotate (V.Vec 45 45 0)
-        --   ]
+    doRectEnvelope Nothing = dummyFigure
+    doRectEnvelope (Just (x_len, y_len)) =
+      buildRectEnvelope switches
+        (computeRectEnvelopeAroundPlate switches x_len y_len 2.5)
 
 mainPlate :: [[Switch]]
-mainPlate = [
+mainPlate = fmap (fmap $ transform (Translate $ V.Vec 0 0 (-5))) [
  [ switch (V.vec 0   0    7)  (V.vec (-25) 10    5)
  , switch (V.vec 22  2    4)  (V.vec (-25) 0     5)
  , switch (V.vec 44  2    4)  (V.vec (-25) 0     0)
@@ -70,12 +72,15 @@ mainPlate = [
 -- Front and back sides are in same order. The same with left and right.
 mainEnvelop :: Envelope
 mainEnvelop = Envelope {
-    front = [V.vec (-20) (-20) 10, V.vec 50 (-20) 10]
+    front = [V.vec (-20) (-20) 10]
   , back  = [V.vec (-20) (70) 10, V.vec 140 (70) 10]
-  , left  = [head (front mainEnvelop), head (back mainEnvelop)]
+  , left  = [V.vec (-20) (-20) 10, head (back mainEnvelop)]
   , right = [V.vec 140 (10) 10, last (back mainEnvelop)]
   , upDirection = V.Vec 0 0 1
   }
+
+mainRectEnvelope :: (Double, Double)
+mainRectEnvelope = (140, 85)
 
 thumbPlate :: [[Switch]]
 thumbPlate = [
@@ -96,40 +101,8 @@ thumbPlate = [
 singleSocket :: [[Switch]]
 singleSocket = [[switch (V.vec 0 0 0) (V.vec 0 0 0)]]
 
-test :: String
-test =
-  renderToScad $ union [
-          buildPlate switches
-        -- , projectionDown (platePerimeter )
-        -- , (buildKeycaps $ concat switches)
-        , buildPlate pad
-
-        , Sp.line 2.5 (init $ sandwidgeMiddle (plateFrontWall switches))
-        , Sp.line 2.5 (init $ sandwidgeMiddle (plateLeftWall pad))
-
-        , block $ Sp.connectPaths 2.5
-          (init $ sandwidgeMiddle (plateFrontWall switches))
-          (reverse $ init $ sandwidgeMiddle (plateLeftWall pad))
-        -- , buildEnvelope (fmap (fmap tr) switches) (fmap tr envelope)
-        ]
-  where
-    tr x = transformBySeq [ Translate (V.Vec (-50) 0 0)
-                          , Rotate (V.Vec (0) (-45) 0)] x
-    switches = fmap (fmap tr) mainPlate
-
-    tr2 x = transformBySeq [ Translate (V.Vec (-10) (-40) 30)
-                           , Rotate (V.Vec (50) (0) (0))
-                           , Rotate (V.Vec (0) (0) (-40))
-                           ] x
-    pad = fmap (fmap tr2) thumbPlate
-    -- tr = id
-        -- tr1 = transformBySeq [
-        --   Rotate (V.Vec 45 45 0)
-        --   ]
-
 main :: IO ()
-main = do writeFile "test.scad" test
-          --withFile "main_plate.scad"  WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate (Just mainEnvelop)
-          -- withFile "main_plate2.scad" WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate Nothing
-          -- withFile "thumb_plate.scad" WriteMode $ \h -> hPutStrLn h $  buildFinalPart thumbPlate Nothing
-          -- withFile "single_socket.scad" WriteMode $ \h -> hPutStrLn h $ buildFinalPart singleSocket Nothing
+main = do withFile "main_plate.scad"  WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate Nothing (Just mainRectEnvelope)
+          withFile "main_plate2.scad" WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate Nothing Nothing
+          withFile "thumb_plate.scad" WriteMode $ \h -> hPutStrLn h $  buildFinalPart thumbPlate Nothing Nothing
+          withFile "single_socket.scad" WriteMode $ \h -> hPutStrLn h $ buildFinalPart singleSocket Nothing Nothing

@@ -1,6 +1,9 @@
 module Parts.Plate (
   Plate
+  , Rect(..)
+  , plateBoundingRect
   , buildPlate
+  , buildHoles
   , plateFrontWall
   , plateBackWall
   , plateRightWall
@@ -30,6 +33,22 @@ type Plate = [[Switch]]
 data SocketBar = SocketBar {
   socketVertIds :: [Int]
   } deriving Show
+
+data Rect = Rect {
+  rectLeft :: Double
+  , rectRight :: Double
+  , rectFront :: Double
+  , rectBack :: Double
+  } deriving Show
+
+plateBoundingRect :: Plate -> Rect
+plateBoundingRect plate =
+  let switches = concat plate
+      l = minimum $ map V.x $ concat $ map switchVertexes switches
+      r = maximum $ map V.x $ concat $ map switchVertexes switches
+      f = minimum $ map V.y $ concat $ map switchVertexes switches
+      b = maximum $ map V.y $ concat $ map switchVertexes switches
+  in (Rect l r f b)
 
 socketVert :: Int -> SocketBar -> Int
 socketVert n (SocketBar xs) = xs !! n
@@ -98,12 +117,13 @@ buildPlateBody switches = buildPolyhedron $ do
 topToBottom :: Int -> Int
 topToBottom = (+ 4)
 
-buildHoles :: [Switch] -> ScadProgram
-buildHoles switches = union (map buildSwitchHole switches)
+buildHoles :: Plate -> ScadProgram
+buildHoles switches = union (map buildSwitchHole (concat switches)
+                            ++ map buildKeycapPadHole (concat switches))
 
 buildPlate :: Plate -> ScadProgram
 buildPlate switches = difference [ buildPlateBody switches
-                                 , buildHoles $ concat switches]
+                                 , buildHoles switches]
 
 -- TODO: this functions are similar to add* functions used
 -- with polyhedron monad. Refactor to use same logic.

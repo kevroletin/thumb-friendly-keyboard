@@ -3,6 +3,7 @@ module Parts.Switch (
   , switchVertexes
   , switch
   , buildSwitchHole
+  , buildKeycapPadHole
 ) where
 
 import qualified Data.Glome.Vec as V
@@ -43,6 +44,14 @@ buildSwitchHole (Switch ts) = transformBySeq ts $ block [
     cube' len_x len_y len_z dz =
       translate (-len_x / 2) (-len_y / 2) (-switchHeight / 2 + dz) $
       cube len_x len_y len_z
+
+{-| This hole ensures that switch has clear space for keycap when key is pressed.
+  (+ 0.0001) is a trick to preserve socket top surface in OpenScad preview
+-}
+buildKeycapPadHole :: Switch -> ScadProgram
+buildKeycapPadHole (Switch ts) = transformBySeq ts $
+  translate 0 0 ((switchHeight + h)/2 + 0.0001) (cube0 switchWidth switchWidth h)
+  where h = 4
 
 switch position angles =
   Switch [Translate position, Rotate angles]
