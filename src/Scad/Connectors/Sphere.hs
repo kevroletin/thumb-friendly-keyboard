@@ -3,9 +3,11 @@
 module Scad.Connectors.Sphere (
   addSandwigeBorders
   , projectSandwigeDown
+  , projectWallDown
   , connectPaths
   , line
   , lineVarR
+  , projectPathDown
 ) where
 
 import qualified Data.Glome.Vec as V
@@ -19,14 +21,25 @@ import           Scad.Utils
 addSandwigeBorders :: Sandwidge V.Vec -> ScadProgram
 addSandwigeBorders = lineVarR . sandwidgeMiddleWithR
 
-projectSandwigeDown :: Sandwidge V.Vec -> ScadProgram
-projectSandwigeDown s@(Sandwidge t0 b0) = union $
-  flip map (pairsLooped (t `zip` b)) $ \((a, b), (c, d)) ->
+projectWallDown :: Wall V.Vec -> ScadProgram
+projectWallDown s@(Wall t0 b0) = union $
+  flip map (pairs (t `zip` b)) $ \((a, b), (c, d)) ->
     (hull $ map (uncurry sphere) [a, b, c, d])
   where
-    t = sandwidgeMiddleWithR s
+    t = wallMiddleWithR s
     b = map lower t
     lower (r, V.Vec x y z) = (r, V.Vec x y r)
+
+projectSandwigeDown :: Sandwidge V.Vec -> ScadProgram
+projectSandwigeDown s@(Sandwidge t0 b0) =
+  projectWallDown (Wall (t0 ++ [head t0]) (b0 ++ [head b0]))
+
+projectPathDown :: Double -> Path -> ScadProgram
+projectPathDown r path = union $
+  flip map (pairs path) $ \(a, b) ->
+                            hull $ map (sphere r) [a, b, lower a, lower b]
+  where
+    lower (V.Vec x y z) = V.Vec x y r
 
 triangle :: Double -> V.Vec -> V.Vec -> V.Vec -> ScadProgram
 triangle r a b c =

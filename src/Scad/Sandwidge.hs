@@ -5,6 +5,8 @@ module Scad.Sandwidge (
   , sandwidgeMiddleWithR
   , sandwidgeMiddle
   , wallMiddle
+  , wallMiddleWithR
+  , reverseWall
 ) where
 
 import qualified Data.Glome.Vec as V
@@ -53,3 +55,11 @@ sandwidgeMiddle (Sandwidge t0 b0) =
 wallMiddle :: Wall V.Vec -> Path
 wallMiddle (Wall t0 b0) =
   zipWith segmentMiddlePoint t0 b0
+
+wallMiddleWithR :: Wall V.Vec -> [(V.Flt, V.Vec)]
+wallMiddleWithR (Wall t0 b0) =
+  let go a b = (halfDist a b, segmentMiddlePoint a b)
+  in zipWith go t0 b0
+
+reverseWall :: Wall a -> Wall a
+reverseWall (Wall t b) = Wall (reverse t) (reverse b)

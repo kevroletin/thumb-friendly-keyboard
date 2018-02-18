@@ -8,21 +8,23 @@ import           System.IO
 import           Scad
 -- TODO: main shouldn't contain rendering logic, only configuration
 import           Config
+import           Data.Maybe
+import           Data.Monoid
 import           GeneralUtils
 import           Parts
 import           Scad
 import qualified Scad.Connectors.Sphere as Sp
+import           Scad.Sandwidge
 import           Transformation
-import Data.Maybe
 
 -- TODO: several figures are actually figure + set of holes. Figures could
 -- intersect so we combine figures as the first step and only then remove holes.
 -- This could be factored out into something like a Monoid: we combine figures
 -- with holes and then render them.
 buildFinalPart :: [[Switch]] -> Maybe Envelope -> Maybe (Double, Double)
-               -> String
+               -> ScadProgram
 buildFinalPart switches envelope rectEnvelope =
-  renderToScad $ difference [
+  difference [
     union [
         buildPlate switches
         , buildKeycaps switches
@@ -97,8 +99,53 @@ thumbRectEnvelope = (65, 65)
 singleSocket :: [[Switch]]
 singleSocket = [[switch (vec 0 0 0) (vec 0 0 0)]]
 
+writeFigureToFile :: FilePath -> ScadProgram -> IO ()
+writeFigureToFile fileName figure =
+  withFile fileName WriteMode $ \h -> hPutStrLn h (renderToScad figure)
+
+writeFinalPartToFile ::
+  (FilePath, Plate, Maybe Envelope, Maybe (Double, Double))
+  -> IO ()
+writeFinalPartToFile (fileName, plate, envelope, rectEnvelope) =
+  writeFigureToFile fileName (buildFinalPart plate envelope rectEnvelope)
+
+
+bodyDemo :: ScadProgram
+bodyDemo = union [
+  buildPlate p1
+  , buildPlate p2
+  , buildKeycaps p1
+  , buildKeycaps p2
+
+  , Sp.connectPaths 2.5 (wallMiddle $ plateFrontWall p1)
+    (wallMiddle $ reverseWall $ plateBackWall p2 <> plateLeftWall p2)
+  , Sp.projectWallDown (plateLeftWall p1)
+  , Sp.projectWallDown (plateBackWall p1)
+  , Sp.projectWallDown (plateRightWall p2)
+  , Sp.projectWallDown (plateFrontWall p2)
+  , Sp.projectPathDown 2.5 [
+      (head $ wallMiddle (plateFrontWall p1))
+      , (last $ wallMiddle (plateLeftWall p2))
+      ]
+  ]
+  where
+    tr1 = transformBySeq [
+      Translate (vec 0 0 10)
+      , Rotate (vec 0 (-60) 0)
+      ]
+    tr2 = transformBySeq [
+      Translate (vec 45 (-45) 25)
+      , Rotate (vec 50 (-20) 0)
+      ]
+    p1 = (tr1 mainPlate)
+    p2 = (tr2 thumbPlate)
+
 main :: IO ()
-main = do withFile "main_plate.scad"  WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate Nothing (Just mainRectEnvelope)
-          withFile "main_plate2.scad" WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate Nothing Nothing
-          withFile "thumb_plate.scad" WriteMode $ \h -> hPutStrLn h $  buildFinalPart thumbPlate Nothing (Just thumbRectEnvelope)
-          withFile "single_socket.scad" WriteMode $ \h -> hPutStrLn h $ buildFinalPart singleSocket Nothing Nothing
+main = do
+  mapM_ writeFinalPartToFile [
+      ("main_plate.scad", mainPlate, Nothing, Just mainRectEnvelope)
+    , ("main_plate2.scad", mainPlate, Nothing, Nothing)
+    , ("thumb_plate.scad", thumbPlate, Nothing, Just thumbRectEnvelope)
+    , ("single_socket.scad", singleSocket, Nothing, Nothing)
+    ]
+  writeFigureToFile "body_demo.scad" bodyDemo

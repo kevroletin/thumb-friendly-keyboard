@@ -1,3 +1,6 @@
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+
 module Parts.Plate (
   Plate
   , Rect(..)
@@ -24,6 +27,9 @@ import           Scad.Sandwidge
 import           Transformation
 
 type Plate = [[Switch]]
+
+instance Transformable Plate where
+  transform t = fmap (fmap (transform t))
 
 {-|Parallelepiped where we create hole to turn it into a socket for a key. It
   contains 8 "vertexes". But since it is supposed to be used within a polyhedron
@@ -146,6 +152,8 @@ plateLeftWall plate = Wall
   (concat $ map (\x -> [x !! 1, x !! 0]) $ reverse $ map switchVertexes (map head plate))
   (concat $ map (\x -> [x !! 5, x !! 4]) $ reverse $ map switchVertexes (map head plate))
 
-platePerimeter :: Plate -> Wall V.Vec
+platePerimeter :: Plate -> Sandwidge V.Vec
 platePerimeter p =
-  plateFrontWall p <> plateRightWall p <> plateBackWall p <> plateLeftWall p
+  let (Wall t b) = plateFrontWall p <> plateRightWall p <>
+                   plateBackWall p <> plateLeftWall p
+  in Sandwidge t b
