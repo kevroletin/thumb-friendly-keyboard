@@ -17,7 +17,6 @@ import qualified Data.Glome.Vec as V
 import qualified Data.List      as List
 import           Data.Monoid
 import           GeneralUtils
-import           Keyboard
 import           Parts.Switch
 import           Scad
 import           Scad.Builders

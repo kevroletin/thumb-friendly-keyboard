@@ -1,24 +1,23 @@
 module Parts.RectEnvelope (
   RectEnvelope(..)
   , buildRectEnvelope
-  , rectEnvelopeHole
+  , buildRectEnvelopeHole
   , computeRectEnvelopeAroundPlate
 ) where
 
-import qualified Data.Glome.Vec as V
-import Parts.Envelope
-import Parts.Plate
-import Parts.Switch
-import Scad.Builders
-import Scad.Sandwidge
-import Scad
-import qualified Scad.SphereConnectors as Sphere
+import qualified Data.Glome.Vec         as V
+import           Parts.Envelope
+import           Parts.Plate
+import           Parts.Switch
+import           Scad
+import           Scad.Builders
+import qualified Scad.Connectors.Sphere as Sphere
+import           Scad.Sandwidge
 
 data RectEnvelope = RectEnvelope {
   lf, lb, rb, rf :: V.Vec
-  , r :: Double
+  , r            :: Double
   } deriving Show
-
 
 buildPart :: Double -> Wall V.Vec -> V.Vec -> V.Vec -> ScadProgram
 buildPart r wall a b = union $ [
@@ -36,8 +35,8 @@ buildRectEnvelope p (RectEnvelope lf lb rb rf r) = union $ [
   , buildPart r (plateRightWall p) rf rb
   ]
 
-rectEnvelopeHole :: RectEnvelope -> ScadProgram
-rectEnvelopeHole (RectEnvelope lf lb rb rf r) = union $ [
+buildRectEnvelopeHole :: RectEnvelope -> ScadProgram
+buildRectEnvelopeHole (RectEnvelope lf lb rb rf r) = union $ [
   part lf rf
   , part rb lb
   , part lb lf

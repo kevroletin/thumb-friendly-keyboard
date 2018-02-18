@@ -13,7 +13,6 @@ module Parts.Envelope (
 
 import           Config
 import qualified Data.Glome.Vec as V
-import           Keyboard
 import           Parts.Plate
 import           Parts.Switch
 import           Scad

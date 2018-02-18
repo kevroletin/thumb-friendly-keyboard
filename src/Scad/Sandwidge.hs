@@ -10,8 +10,8 @@ module Scad.Sandwidge (
 import qualified Data.Glome.Vec as V
 import           Data.Monoid
 import           GeneralUtils
-import           Scad
 import           Scad.Builders
+import           Scad.Internal
 import           Scad.Path
 import           Scad.Utils
 
@@ -46,10 +46,10 @@ sandwidgeMiddleWithR (Sandwidge t0 b0) =
   let go a b = (halfDist a b, segmentMiddlePoint a b)
   in zipWith go (t0 ++ [head t0]) (b0 ++ [head b0])
 
-sandwidgeMiddle :: Sandwidge V.Vec -> [V.Vec]
+sandwidgeMiddle :: Sandwidge V.Vec -> Path
 sandwidgeMiddle (Sandwidge t0 b0) =
   zipWith segmentMiddlePoint (t0 ++ [head t0]) (b0 ++ [head b0])
 
-wallMiddle :: Wall V.Vec -> [V.Vec]
+wallMiddle :: Wall V.Vec -> Path
 wallMiddle (Wall t0 b0) =
   zipWith segmentMiddlePoint t0 b0

@@ -1,6 +1,6 @@
 {-|Produce "3d lines" and "3d surfaces" by extruding spheres
 -}
-module Scad.SphereConnectors (
+module Scad.Connectors.Sphere (
   addSandwigeBorders
   , projectSandwigeDown
   , connectPaths

@@ -7,8 +7,8 @@ module Scad.Utils (
 
 import qualified Data.Glome.Vec as V
 import           GeneralUtils
-import           Scad
 import           Scad.Builders
+import           Scad.Internal
 
 dist :: V.Vec -> V.Vec -> V.Flt
 dist (V.Vec x y z) (V.Vec x' y' z') =

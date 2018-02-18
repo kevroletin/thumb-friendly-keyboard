@@ -1,4 +1,4 @@
-module Scad.FlatConnectors (
+module Scad.Connectors.Surface (
   connectPaths
 ) where
 
