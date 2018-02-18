@@ -1,0 +1,7 @@
+allow-newer: true
+flags: {}
+packages:
+- .
+extra-deps:
+- GlomeVec-0.2
+resolver: lts-10.2
