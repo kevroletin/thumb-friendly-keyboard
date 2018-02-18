@@ -79,10 +79,8 @@ envelopeRightWall e = Wall (right e) (translateEnvelopLine e $ right e)
 envelopeLeftWall :: Envelope -> Wall V.Vec
 envelopeLeftWall e = Wall (reverse $ left e) (reverse $ translateEnvelopLine e $ left e)
 
--- TODO: remove maybe from type signature
-buildEnvelope :: Plate -> Maybe Envelope -> ScadProgram
-buildEnvelope _ Nothing = dummyFigure
-buildEnvelope p (Just e) = union [
+buildEnvelope :: Plate -> Envelope -> ScadProgram
+buildEnvelope p e = union [
   buildEnvelopePart (plateFrontWall p) (envelopeFrontWall e)
   , buildEnvelopePart (plateBackWall p) (envelopeBackWall e)
   , buildEnvelopePart (plateRightWall p) (envelopeRightWall e)

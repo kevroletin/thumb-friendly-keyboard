@@ -4,6 +4,7 @@ module Parts.Keycaps (
 
 import           Config
 import qualified Data.Glome.Vec as V
+import           Parts.Plate    (Plate)
 import           Parts.Switch
 import           Scad
 import           Scad.Builders
@@ -22,5 +23,5 @@ buildKeycap (Switch ts) =
     hbw = keycapBottomWidth / 2
     htw = keycapTopWidth / 2
 
-buildKeycaps :: [Switch] -> ScadProgram
-buildKeycaps switches = union (map buildKeycap switches)
+buildKeycaps :: Plate -> ScadProgram
+buildKeycaps switches = union (map buildKeycap (concat switches))

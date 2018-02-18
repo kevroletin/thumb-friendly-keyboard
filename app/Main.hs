@@ -13,28 +13,28 @@ import           Parts
 import           Scad
 import qualified Scad.Connectors.Sphere as Sp
 import           Transformation
+import Data.Maybe
 
+-- TODO: several figures are actually figure + set of holes. Figures could
+-- intersect so we combine figures as the first step and only then remove holes.
+-- This could be factored out into something like a Monoid: we combine figures
+-- with holes and then render them.
 buildFinalPart :: [[Switch]] -> Maybe Envelope -> Maybe (Double, Double)
                -> String
 buildFinalPart switches envelope rectEnvelope =
   renderToScad $ difference [
     union [
         buildPlate switches
-        , (buildKeycaps $ concat switches)
-        , buildEnvelope switches envelope
-        , maybeRectEnvelope rectEnvelope
+        , buildKeycaps switches
+        , maybeFigure (buildEnvelope switches <$> envelope)
+        , maybeFigure (buildRectEnvelope switches . compureRectCoords <$> rectEnvelope)
         ]
-    , buildHoles switches
-    , maybeRectEnvelopeHole rectEnvelope
+    , buildPlateHoles switches
+    , maybeFigure (buildRectEnvelopeHole . compureRectCoords <$> rectEnvelope)
     ]
   where
-    env x_len y_len = (computeRectEnvelopeAroundPlate switches x_len y_len 2.5)
-    maybeRectEnvelopeHole Nothing = dummyFigure
-    maybeRectEnvelopeHole (Just (x_len, y_len)) =
-      buildRectEnvelopeHole (env x_len y_len)
-    maybeRectEnvelope Nothing = dummyFigure
-    maybeRectEnvelope (Just (x_len, y_len)) =
-      buildRectEnvelope switches (env x_len y_len)
+    maybeFigure = fromMaybe dummyFigure
+    compureRectCoords (x_len, y_len) = (computeRectEnvelopeAroundPlate switches x_len y_len 2.5)
 
 mainPlate :: [[Switch]]
 mainPlate = fmap (fmap $ transform (Translate $ vec 0 0 (-5))) [

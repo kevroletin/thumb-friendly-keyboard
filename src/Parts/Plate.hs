@@ -3,7 +3,7 @@ module Parts.Plate (
   , Rect(..)
   , plateBoundingRect
   , buildPlate
-  , buildHoles
+  , buildPlateHoles
   , plateFrontWall
   , plateBackWall
   , plateRightWall
@@ -116,13 +116,13 @@ buildPlateBody switches = buildPolyhedron $ do
 topToBottom :: Int -> Int
 topToBottom = (+ 4)
 
-buildHoles :: Plate -> ScadProgram
-buildHoles switches = union (map buildSwitchHole (concat switches)
-                            ++ map buildKeycapPadHole (concat switches))
+buildPlateHoles :: Plate -> ScadProgram
+buildPlateHoles switches = union (map buildSwitchHole (concat switches)
+                                  ++ map buildKeycapPadHole (concat switches))
 
 buildPlate :: Plate -> ScadProgram
 buildPlate switches = difference [ buildPlateBody switches
-                                 , buildHoles switches]
+                                 , buildPlateHoles switches]
 
 -- TODO: this functions are similar to add* functions used
 -- with polyhedron monad. Refactor to use same logic.
