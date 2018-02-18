@@ -1,6 +1,7 @@
 module Parts.RectEnvelope (
   RectEnvelope(..)
   , buildRectEnvelope
+  , rectEnvelopeHole
   , computeRectEnvelopeAroundPlate
 ) where
 
@@ -18,6 +19,7 @@ data RectEnvelope = RectEnvelope {
   , r :: Double
   } deriving Show
 
+
 buildPart :: Double -> Wall V.Vec -> V.Vec -> V.Vec -> ScadProgram
 buildPart r wall a b = union $ [
   Sphere.connectPaths r (wallMiddle wall) [a, b]
@@ -33,6 +35,17 @@ buildRectEnvelope p (RectEnvelope lf lb rb rf r) = union $ [
   , buildPart r (plateLeftWall p) lb lf
   , buildPart r (plateRightWall p) rf rb
   ]
+
+rectEnvelopeHole :: RectEnvelope -> ScadProgram
+rectEnvelopeHole (RectEnvelope lf lb rb rf r) = union $ [
+  part lf rf
+  , part rb lb
+  , part lb lf
+  , part rf rb
+  ]
+  where
+    part a b = hull ([cube' a, cube' b])
+    cube' (V.Vec x y z) = translate x y (z - 2*r) (cube0 (2*r) (2*r) (2*r))
 
 computeRectEnvelopeAroundPlate :: Plate -> Double -> Double -> Double
   -> RectEnvelope

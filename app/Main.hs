@@ -36,35 +36,39 @@ buildFinalPart switches envelope rectEnvelope =
           , doRectEnvelope rectEnvelope
           ]
     , buildHoles switches
+    , doRectEnvelopeHole rectEnvelope
     ]
   where
+    env x_len y_len = (computeRectEnvelopeAroundPlate switches x_len y_len 2.5)
+    doRectEnvelopeHole Nothing = dummyFigure
+    doRectEnvelopeHole (Just (x_len, y_len)) =
+      rectEnvelopeHole (env x_len y_len)
     doRectEnvelope Nothing = dummyFigure
     doRectEnvelope (Just (x_len, y_len)) =
-      buildRectEnvelope switches
-        (computeRectEnvelopeAroundPlate switches x_len y_len 2.5)
+      buildRectEnvelope switches (env x_len y_len)
 
 mainPlate :: [[Switch]]
 mainPlate = fmap (fmap $ transform (Translate $ V.Vec 0 0 (-5))) [
- [ switch (V.vec 0   0    7)  (V.vec (-25) 10    5)
- , switch (V.vec 22  2    4)  (V.vec (-25) 0     5)
- , switch (V.vec 44  2    4)  (V.vec (-25) 0     0)
- , switch (V.vec 66  4    4)  (V.vec (-25) 0     0)
- , switch (V.vec 90  (-2) 6)  (V.vec (-25) (-10) (-15))
- , switch (V.vec 111 (-6) 12) (V.vec (-25) (-20) (-15))
+ [ switch (V.vec (0)    (-4) (6))  (V.vec (-30) (0) (0))
+ , switch (V.vec (19.5) (-2) (6))  (V.vec (-30) (0) (0))
+ , switch (V.vec (39)   (0)  (4))  (V.vec (-30) (0) (0))
+ , switch (V.vec (58.5) (1)  (1))  (V.vec (-30) (0) (0))
+ , switch (V.vec (78)   (-2) (4))  (V.vec (-30) (0) (0))
+ , switch (V.vec (97.5) (-4) (4))  (V.vec (-30) (0) (0))
  ],
- [ switch (V.vec 0   23   2)  (V.vec (0)   10    5)
- , switch (V.vec 22  25   0)  (V.vec (0)   0     5)
- , switch (V.vec 44  28   0)  (V.vec (0)   0     0)
- , switch (V.vec 66  30   0)  (V.vec (0)   0     0)
- , switch (V.vec 90  22   2)  (V.vec (0)   (-10) (-15))
- , switch (V.vec 111 18   09) (V.vec (0)   (-20) (-15))
+ [ switch (V.vec (0)    (18) (0))  (V.vec (0)   (0) (0))
+ , switch (V.vec (19.5) (20) (0))  (V.vec (0)   (0) (0))
+ , switch (V.vec (39)   (22) (-2)) (V.vec (0)   (0) (0))
+ , switch (V.vec (58.5) (23) (-5)) (V.vec (0)   (0) (0))
+ , switch (V.vec (78)   (20) (-2)) (V.vec (0)   (0) (0))
+ , switch (V.vec (97.5) (18) (-2)) (V.vec (0)   (0) (0))
  ],
- [ switch (V.vec 0   46   8)  (V.vec (25)  10    5)
- , switch (V.vec 22  48   6)  (V.vec (25)  0     5)
- , switch (V.vec 44  54   6)  (V.vec (25)  0     0)
- , switch (V.vec 66  56   6)  (V.vec (25)  0     0)
- , switch (V.vec 90  46   8)  (V.vec (25)  (-10) (-15))
- , switch (V.vec 111 42   15) (V.vec (30)  (-23) (-15))
+ [ switch (V.vec (0)    (40) (6))  (V.vec (30)  (0) (0))
+ , switch (V.vec (19.5) (42) (6))  (V.vec (30)  (0) (0))
+ , switch (V.vec (39)   (44) (4))  (V.vec (30)  (0) (0))
+ , switch (V.vec (58.5) (45) (1))  (V.vec (30)  (0) (0))
+ , switch (V.vec (78)   (42) (4))  (V.vec (30)  (0) (0))
+ , switch (V.vec (97.5) (40) (4))  (V.vec (30)  (0) (0))
  ]
  ]
 
@@ -80,23 +84,26 @@ mainEnvelop = Envelope {
   }
 
 mainRectEnvelope :: (Double, Double)
-mainRectEnvelope = (140, 85)
+mainRectEnvelope = (130, 70)
 
 thumbPlate :: [[Switch]]
 thumbPlate = [
- [ switch (V.vec 0  0  6) (V.vec (-15) (15)  0)
- , switch (V.vec 22 0  3) (V.vec (-15) 0     0)
- , switch (V.vec 44 0  6) (V.vec (-15) (-15) 0)
+ [ switch (V.vec 0    0    (1))  (V.vec (-15) (15)  0)
+ , switch (V.vec 21.5 0    (-2)) (V.vec (-15) 0     0)
+ , switch (V.vec 43   0    (1))  (V.vec (-15) (-15) 0)
  ],
- [ switch (V.vec 0  22 3) (V.vec 0     (15)  0)
- , switch (V.vec 22 22 0) (V.vec 0     0     0)
- , switch (V.vec 44 22 3) (V.vec 0     (-15) 0)
+ [ switch (V.vec 0    21.5 (-2)) (V.vec 0     (15)  0)
+ , switch (V.vec 21.5 21.5 (-5)) (V.vec 0     0     0)
+ , switch (V.vec 43   21.5 (-2)) (V.vec 0     (-15) 0)
  ],
- [ switch (V.vec 0  44 6) (V.vec (15)  (15)  0)
- , switch (V.vec 22 44 3) (V.vec (15)  0     0)
- , switch (V.vec 44 44 6) (V.vec (15)  (-15) 0)
+ [ switch (V.vec 0    43   (1))  (V.vec (15)  (15)  0)
+ , switch (V.vec 21.5 43   (-2)) (V.vec (15)  0     0)
+ , switch (V.vec 43   43   (1))  (V.vec (15)  (-15) 0)
  ]
  ]
+
+thumbRectEnvelope :: (Double, Double)
+thumbRectEnvelope = (65, 65)
 
 singleSocket :: [[Switch]]
 singleSocket = [[switch (V.vec 0 0 0) (V.vec 0 0 0)]]
@@ -104,5 +111,5 @@ singleSocket = [[switch (V.vec 0 0 0) (V.vec 0 0 0)]]
 main :: IO ()
 main = do withFile "main_plate.scad"  WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate Nothing (Just mainRectEnvelope)
           withFile "main_plate2.scad" WriteMode  $ \h -> hPutStrLn h $ buildFinalPart mainPlate Nothing Nothing
-          withFile "thumb_plate.scad" WriteMode $ \h -> hPutStrLn h $  buildFinalPart thumbPlate Nothing Nothing
+          withFile "thumb_plate.scad" WriteMode $ \h -> hPutStrLn h $  buildFinalPart thumbPlate Nothing (Just thumbRectEnvelope)
           withFile "single_socket.scad" WriteMode $ \h -> hPutStrLn h $ buildFinalPart singleSocket Nothing Nothing

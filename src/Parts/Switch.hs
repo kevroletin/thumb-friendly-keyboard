@@ -30,7 +30,7 @@ switchVertexes (Switch ts) =
          ]
   where
     tr = transformBySeq ts
-    w  = switchWidth / 2
+    w  = switchSocketWidth / 2
     h  = switchHeight / 2
 
 buildSwitchHole :: Switch -> ScadProgram
@@ -39,7 +39,7 @@ buildSwitchHole (Switch ts) = transformBySeq ts $ block [
   , cube' holeWidth (holeWidth + 2 * holeNotchWidth) switchHeight (-holeNotchHeight)
   ]
   where
-    -- cube switchWidth switchWidth switchHeight will exactly match occupy
+    -- cube switchSocketWidth switchSocketWidth switchHeight will exactly match occupy
     -- switch space
     cube' len_x len_y len_z dz =
       translate (-len_x / 2) (-len_y / 2) (-switchHeight / 2 + dz) $
@@ -50,7 +50,7 @@ buildSwitchHole (Switch ts) = transformBySeq ts $ block [
 -}
 buildKeycapPadHole :: Switch -> ScadProgram
 buildKeycapPadHole (Switch ts) = transformBySeq ts $
-  translate 0 0 ((switchHeight + h)/2 + 0.0001) (cube0 switchWidth switchWidth h)
+  translate 0 0 ((switchHeight + h)/2 + 0.0001) (cube0 switchSocketWidth switchSocketWidth h)
   where h = 4
 
 switch position angles =

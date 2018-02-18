@@ -1,7 +1,7 @@
 {-|Numerical parameters which affect rendered shapes.
 -}
 module Config (
-  switchWidth
+  switchSocketWidth
   , switchHeight
   , holeWidth
   , holeNotchWidth
@@ -12,8 +12,8 @@ module Config (
   , envelopHeight
 ) where
 
-switchWidth :: Double
-switchWidth = 19.05
+switchSocketWidth :: Double
+switchSocketWidth = 18.05
 
 switchHeight :: Double
 switchHeight = 5
@@ -28,7 +28,7 @@ holeNotchHeight :: Double
 holeNotchHeight = 1.5
 
 keycapBottomWidth :: Double
-keycapBottomWidth = switchWidth
+keycapBottomWidth = 19.05
 
 keycapTopWidth :: Double
 keycapTopWidth = 14
