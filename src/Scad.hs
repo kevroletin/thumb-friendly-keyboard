@@ -3,4 +3,4 @@ module Scad (
   , renderToScad
 ) where
 
-import Scad.Internal
+import           Scad.Internal

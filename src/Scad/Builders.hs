@@ -23,8 +23,8 @@ module Scad.Builders (
 ) where
 
 import           Control.Monad.State
-import qualified Data.Glome.Vec      as V
 import           Data.Foldable
+import qualified Data.Glome.Vec      as V
 import           GeneralUtils
 import           Scad.Internal
 import           Transformation
@@ -33,7 +33,7 @@ type PolyhedronMonad a = State (Int, [V.Vec], [PolyhedronSurface]) a
 
 instance Transformable ScadProgram where
   transform (Rotate angle) p = rotateV angle p
-  transform (Translate d) p = translateV d p
+  transform (Translate d) p  = translateV d p
 
 eachSquare :: [[a]]
            -> (a -> a -> a -> a -> PolyhedronMonad b)

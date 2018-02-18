@@ -1,25 +1,25 @@
 module Main where
 
-import System.IO
-import qualified Data.Glome.Vec as V
-import qualified Data.List as List
-import Control.Monad.State
-import Data.Foldable
+import           Control.Monad.State
+import           Data.Foldable
+import qualified Data.Glome.Vec        as V
+import qualified Data.List             as List
+import           System.IO
 
-import Scad
+import           Scad
 -- TODO: main shouldn't contain rendering logic, only configuration arrays
-import Scad.Builders
-import Scad.Sandwidge
-import GeneralUtils
-import Keyboard
-import Config
-import Parts
-import Transformation
-import Parts.Switch
-import Parts.Envelope
-import Parts.RectEnvelope
-import Parts.Plate
+import           Config
+import           GeneralUtils
+import           Keyboard
+import           Parts
+import           Parts.Envelope
+import           Parts.Plate
+import           Parts.RectEnvelope
+import           Parts.Switch
+import           Scad.Builders
+import           Scad.Sandwidge
 import qualified Scad.SphereConnectors as Sp
+import           Transformation
 
 -- We assume next view location:
 -- + x goes from left to right

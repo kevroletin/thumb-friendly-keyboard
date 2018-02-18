@@ -3,11 +3,11 @@ module Scad.FlatConnectors (
 ) where
 
 import qualified Data.Glome.Vec as V
-import Scad
-import Scad.Builders
-import Scad.Utils
-import GeneralUtils
-import Scad.Path
+import           GeneralUtils
+import           Scad
+import           Scad.Builders
+import           Scad.Path
+import           Scad.Utils
 
 -- TODO: define orientation
 connectPaths :: [V.Vec] -> [V.Vec] -> PolyhedronMonad ()

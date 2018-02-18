@@ -11,9 +11,9 @@ module Scad.Path (
 ) where
 
 import qualified Data.Glome.Vec as V
-import Scad.Builders
-import Scad.Utils
-import GeneralUtils
+import           GeneralUtils
+import           Scad.Builders
+import           Scad.Utils
 
 type Path = [V.Vec]
 type Segment = (V.Vec, V.Vec)

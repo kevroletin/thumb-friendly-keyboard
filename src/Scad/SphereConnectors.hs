@@ -9,12 +9,12 @@ module Scad.SphereConnectors (
 ) where
 
 import qualified Data.Glome.Vec as V
-import Scad.Sandwidge
-import Scad
-import Scad.Builders
-import Scad.Utils
-import Scad.Path
-import GeneralUtils
+import           GeneralUtils
+import           Scad
+import           Scad.Builders
+import           Scad.Path
+import           Scad.Sandwidge
+import           Scad.Utils
 
 addSandwigeBorders :: Sandwidge V.Vec -> ScadProgram
 addSandwigeBorders = lineVarR . sandwidgeMiddleWithR

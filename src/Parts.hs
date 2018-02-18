@@ -4,7 +4,7 @@ module Parts (
   , buildEnvelope
 ) where
 
-import Parts.Keycaps
-import Parts.Plate
-import Parts.Envelope
-import Parts.Switch
+import           Parts.Envelope
+import           Parts.Keycaps
+import           Parts.Plate
+import           Parts.Switch

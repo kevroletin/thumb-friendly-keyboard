@@ -8,22 +8,22 @@ module Scad.Sandwidge (
 ) where
 
 import qualified Data.Glome.Vec as V
-import Scad
-import Scad.Builders
-import Scad.Utils
-import GeneralUtils
-import Data.Monoid
-import Scad.Path
+import           Data.Monoid
+import           GeneralUtils
+import           Scad
+import           Scad.Builders
+import           Scad.Path
+import           Scad.Utils
 
 -- Sandwidge is looped
 data Sandwidge a = Sandwidge {
-  sandwidgeTopPlane :: [a]
+  sandwidgeTopPlane      :: [a]
   , sandwidgeBottomPlane :: [a]
   } deriving Show
 
 -- Wall is not looped
 data Wall a = Wall {
-  wallTopPlane :: [a]
+  wallTopPlane      :: [a]
   , wallBottomPlane :: [a]
   } deriving Show
 

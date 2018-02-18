@@ -6,9 +6,9 @@ module Scad.Utils (
 ) where
 
 import qualified Data.Glome.Vec as V
-import GeneralUtils
-import Scad
-import Scad.Builders
+import           GeneralUtils
+import           Scad
+import           Scad.Builders
 
 dist :: V.Vec -> V.Vec -> V.Flt
 dist (V.Vec x y z) (V.Vec x' y' z') =

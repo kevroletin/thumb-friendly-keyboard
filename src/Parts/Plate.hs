@@ -11,18 +11,18 @@ module Parts.Plate (
   , platePerimeter
 ) where
 
+import           Config
+import           Data.Foldable
 import qualified Data.Glome.Vec as V
-import qualified Data.List as List
-import Scad
-import Scad.Builders
-import Config
-import Keyboard
-import GeneralUtils
-import Data.Foldable
-import Parts.Switch
-import Transformation
-import Scad.Sandwidge
-import Data.Monoid
+import qualified Data.List      as List
+import           Data.Monoid
+import           GeneralUtils
+import           Keyboard
+import           Parts.Switch
+import           Scad
+import           Scad.Builders
+import           Scad.Sandwidge
+import           Transformation
 
 type Plate = [[Switch]]
 
@@ -35,10 +35,10 @@ data SocketBar = SocketBar {
   } deriving Show
 
 data Rect = Rect {
-  rectLeft :: Double
+  rectLeft    :: Double
   , rectRight :: Double
   , rectFront :: Double
-  , rectBack :: Double
+  , rectBack  :: Double
   } deriving Show
 
 plateBoundingRect :: Plate -> Rect

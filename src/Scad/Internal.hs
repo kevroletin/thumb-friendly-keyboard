@@ -7,9 +7,9 @@ module Scad.Internal (
   , renderToScad
 ) where
 
-import qualified Data.Glome.Vec      as V
-import qualified Data.List           as List
-import Transformation
+import qualified Data.Glome.Vec as V
+import qualified Data.List      as List
+import           Transformation
 
 type PolyhedronSurface = [Int]
 

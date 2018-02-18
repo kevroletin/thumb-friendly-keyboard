@@ -27,7 +27,7 @@ translateVec :: V.Vec -> V.Vec -> V.Vec
 translateVec delta = V.xfm_point (V.translate delta)
 
 transformVec :: Transformation -> V.Vec -> V.Vec
-transformVec (Rotate a) p = rotateVec a p
+transformVec (Rotate a) p    = rotateVec a p
 transformVec (Translate d) p = translateVec d p
 
 {-|Applies transformations in order similar to function

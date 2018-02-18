@@ -6,11 +6,11 @@ module Parts.Switch (
   , buildKeycapPadHole
 ) where
 
+import           Config
 import qualified Data.Glome.Vec as V
-import Config
-import Transformation
-import Scad
-import Scad.Builders
+import           Scad
+import           Scad.Builders
+import           Transformation
 
 data Switch = Switch [Transformation] deriving Show;
 

@@ -11,21 +11,21 @@ module Parts.Envelope (
   , envelopeLeftWall
 ) where
 
+import           Config
 import qualified Data.Glome.Vec as V
-import Keyboard
-import Config
-import Scad
-import Scad.Builders
-import Parts.Switch
-import Scad.Sandwidge
-import Parts.Plate
-import Transformation
+import           Keyboard
+import           Parts.Plate
+import           Parts.Switch
+import           Scad
+import           Scad.Builders
+import           Scad.Sandwidge
+import           Transformation
 
 data Envelope = Envelope {
-  left  :: [V.Vec],
-  right :: [V.Vec],
-  front :: [V.Vec],
-  back  :: [V.Vec],
+  left        :: [V.Vec],
+  right       :: [V.Vec],
+  front       :: [V.Vec],
+  back        :: [V.Vec],
   upDirection :: V.Vec
   } deriving Show;
 
