@@ -1,4 +1,4 @@
-module Scad.Internal (
+module Keyboard.Scad.Internal (
   ScadProgram(..)
   , PolyhedronSurface
   , OperatorParams(..)
@@ -7,9 +7,9 @@ module Scad.Internal (
   , renderToScad
 ) where
 
-import qualified Data.Glome.Vec as V
-import qualified Data.List      as List
-import           Transformation
+import qualified Data.Glome.Vec          as V
+import qualified Data.List               as List
+import           Keyboard.Transformation
 
 type PolyhedronSurface = [Int]
 

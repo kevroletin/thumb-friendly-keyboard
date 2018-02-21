@@ -2,7 +2,7 @@
    purpose is a smooth transition from curly shape to something regular like a
    parallelepiped.
 -}
-module Parts.Envelope (
+module Keyboard.Parts.Envelope (
   Envelope(..)
   , buildEnvelope
   , envelopeFrontWall
@@ -11,14 +11,14 @@ module Parts.Envelope (
   , envelopeLeftWall
 ) where
 
-import           Config
-import qualified Data.Glome.Vec as V
-import           Parts.Plate
-import           Parts.Switch
-import           Scad
-import           Scad.Builders
-import           Scad.Sandwidge
-import           Transformation
+import qualified Data.Glome.Vec          as V
+import           Keyboard.Config
+import           Keyboard.Parts.Plate
+import           Keyboard.Parts.Switch
+import           Keyboard.Scad
+import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Sandwidge
+import           Keyboard.Transformation
 
 data Envelope = Envelope {
   left        :: [V.Vec],

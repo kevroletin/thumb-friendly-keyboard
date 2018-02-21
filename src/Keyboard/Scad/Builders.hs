@@ -1,4 +1,4 @@
-module Scad.Builders (
+module Keyboard.Scad.Builders (
   block
   , color
   , cube
@@ -24,10 +24,10 @@ module Scad.Builders (
 
 import           Control.Monad.State
 import           Data.Foldable
-import qualified Data.Glome.Vec      as V
-import           GeneralUtils
-import           Scad.Internal
-import           Transformation
+import qualified Data.Glome.Vec          as V
+import           Keyboard.GeneralUtils
+import           Keyboard.Scad.Internal
+import           Keyboard.Transformation
 
 type PolyhedronMonad a = State (Int, [V.Vec], [PolyhedronSurface]) a
 

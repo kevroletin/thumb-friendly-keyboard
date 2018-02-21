@@ -1,6 +1,6 @@
 {-|Numerical parameters which affect rendered shapes.
 -}
-module Config (
+module Keyboard.Config (
   switchSocketWidth
   , switchHeight
   , holeWidth

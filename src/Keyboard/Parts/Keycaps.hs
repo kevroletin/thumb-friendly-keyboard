@@ -1,14 +1,14 @@
-module Parts.Keycaps (
+module Keyboard.Parts.Keycaps (
   buildKeycaps
 ) where
 
-import           Config
-import qualified Data.Glome.Vec as V
-import           Parts.Plate    (Plate)
-import           Parts.Switch
-import           Scad
-import           Scad.Builders
-import           Transformation
+import qualified Data.Glome.Vec          as V
+import           Keyboard.Config
+import           Keyboard.Parts.Plate    (Plate)
+import           Keyboard.Parts.Switch
+import           Keyboard.Scad
+import           Keyboard.Scad.Builders
+import           Keyboard.Transformation
 
 buildKeycap :: Switch -> ScadProgram
 buildKeycap (Switch ts) =

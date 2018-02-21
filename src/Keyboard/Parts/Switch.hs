@@ -1,4 +1,4 @@
-module Parts.Switch (
+module Keyboard.Parts.Switch (
   Switch(..)
   , switchVertexes
   , switch
@@ -6,11 +6,11 @@ module Parts.Switch (
   , buildKeycapPadHole
 ) where
 
-import           Config
-import qualified Data.Glome.Vec as V
-import           Scad
-import           Scad.Builders
-import           Transformation
+import qualified Data.Glome.Vec          as V
+import           Keyboard.Config
+import           Keyboard.Scad
+import           Keyboard.Scad.Builders
+import           Keyboard.Transformation
 
 data Switch = Switch [Transformation] deriving Show;
 

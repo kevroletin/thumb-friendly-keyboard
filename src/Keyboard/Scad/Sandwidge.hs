@@ -1,4 +1,4 @@
-module Scad.Sandwidge (
+module Keyboard.Scad.Sandwidge (
   Sandwidge(..)
   , Wall(..)
   , buildSadwidge
@@ -9,13 +9,13 @@ module Scad.Sandwidge (
   , reverseWall
 ) where
 
-import qualified Data.Glome.Vec as V
+import qualified Data.Glome.Vec         as V
 import           Data.Monoid
-import           GeneralUtils
-import           Scad.Builders
-import           Scad.Internal
-import           Scad.Path
-import           Scad.Utils
+import           Keyboard.GeneralUtils
+import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Internal
+import           Keyboard.Scad.Path
+import           Keyboard.Scad.Utils
 
 -- Sandwidge is looped
 data Sandwidge a = Sandwidge {

@@ -1,18 +1,18 @@
-module Parts.RectEnvelope (
+module Keyboard.Parts.RectEnvelope (
   RectEnvelope(..)
   , buildRectEnvelope
   , buildRectEnvelopeHole
   , computeRectEnvelopeAroundPlate
 ) where
 
-import qualified Data.Glome.Vec         as V
-import           Parts.Envelope
-import           Parts.Plate
-import           Parts.Switch
-import           Scad
-import           Scad.Builders
-import qualified Scad.Connectors.Sphere as Sphere
-import           Scad.Sandwidge
+import qualified Data.Glome.Vec                  as V
+import           Keyboard.Parts.Envelope
+import           Keyboard.Parts.Plate
+import           Keyboard.Parts.Switch
+import           Keyboard.Scad
+import           Keyboard.Scad.Builders
+import qualified Keyboard.Scad.Connectors.Sphere as Sphere
+import           Keyboard.Scad.Sandwidge
 
 data RectEnvelope = RectEnvelope {
   lf, lb, rb, rf :: V.Vec

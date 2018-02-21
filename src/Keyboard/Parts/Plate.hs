@@ -1,7 +1,7 @@
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
 
-module Parts.Plate (
+module Keyboard.Parts.Plate (
   Plate
   , Rect(..)
   , plateBoundingRect
@@ -14,17 +14,17 @@ module Parts.Plate (
   , platePerimeter
 ) where
 
-import           Config
 import           Data.Foldable
-import qualified Data.Glome.Vec as V
-import qualified Data.List      as List
+import qualified Data.Glome.Vec          as V
+import qualified Data.List               as List
 import           Data.Monoid
-import           GeneralUtils
-import           Parts.Switch
-import           Scad
-import           Scad.Builders
-import           Scad.Sandwidge
-import           Transformation
+import           Keyboard.Config
+import           Keyboard.GeneralUtils
+import           Keyboard.Parts.Switch
+import           Keyboard.Scad
+import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Sandwidge
+import           Keyboard.Transformation
 
 type Plate = [[Switch]]
 

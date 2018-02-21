@@ -1,14 +1,14 @@
-module Scad.Utils (
+module Keyboard.Scad.Utils (
   dist
   , halfDist
   , centerMass
   , combineConvexShells
 ) where
 
-import qualified Data.Glome.Vec as V
-import           GeneralUtils
-import           Scad.Builders
-import           Scad.Internal
+import qualified Data.Glome.Vec         as V
+import           Keyboard.GeneralUtils
+import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Internal
 
 dist :: V.Vec -> V.Vec -> V.Flt
 dist (V.Vec x y z) (V.Vec x' y' z') =

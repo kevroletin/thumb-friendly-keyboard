@@ -1,4 +1,4 @@
-module GeneralUtils (
+module Keyboard.GeneralUtils (
   pairs
   , pairsLooped
 ) where

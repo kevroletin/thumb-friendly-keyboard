@@ -1,13 +1,13 @@
-module Scad.Connectors.Surface (
+module Keyboard.Scad.Connectors.Surface (
   connectPaths
 ) where
 
-import qualified Data.Glome.Vec as V
-import           GeneralUtils
-import           Scad
-import           Scad.Builders
-import           Scad.Path
-import           Scad.Utils
+import qualified Data.Glome.Vec         as V
+import           Keyboard.GeneralUtils
+import           Keyboard.Scad
+import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Path
+import           Keyboard.Scad.Utils
 
 -- TODO: define orientation
 connectPaths :: [V.Vec] -> [V.Vec] -> PolyhedronMonad ()

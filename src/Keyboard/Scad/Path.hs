@@ -1,4 +1,4 @@
-module Scad.Path (
+module Keyboard.Scad.Path (
   Path
   , Segment
   , segmentMiddlePoint
@@ -10,10 +10,10 @@ module Scad.Path (
   , splitPathsIntoProportionalSegments
 ) where
 
-import qualified Data.Glome.Vec as V
-import           GeneralUtils
-import           Scad.Builders
-import           Scad.Utils
+import qualified Data.Glome.Vec         as V
+import           Keyboard.GeneralUtils
+import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Utils
 
 type Path = [V.Vec]
 type Segment = (V.Vec, V.Vec)

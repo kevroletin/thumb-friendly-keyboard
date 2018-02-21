@@ -1,4 +1,4 @@
-module Transformation (
+module Keyboard.Transformation (
   Transformation(..)
   , Transformable(..)
   , transformBySeq

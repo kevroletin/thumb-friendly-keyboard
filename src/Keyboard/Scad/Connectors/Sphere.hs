@@ -1,6 +1,6 @@
 {-|Produce "3d lines" and "3d surfaces" by extruding spheres
 -}
-module Scad.Connectors.Sphere (
+module Keyboard.Scad.Connectors.Sphere (
   addSandwigeBorders
   , projectSandwigeDown
   , projectWallDown
@@ -10,13 +10,13 @@ module Scad.Connectors.Sphere (
   , projectPathDown
 ) where
 
-import qualified Data.Glome.Vec as V
-import           GeneralUtils
-import           Scad
-import           Scad.Builders
-import           Scad.Path
-import           Scad.Sandwidge
-import           Scad.Utils
+import qualified Data.Glome.Vec          as V
+import           Keyboard.GeneralUtils
+import           Keyboard.Scad
+import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Path
+import           Keyboard.Scad.Sandwidge
+import           Keyboard.Scad.Utils
 
 addSandwigeBorders :: Sandwidge V.Vec -> ScadProgram
 addSandwigeBorders = lineVarR . sandwidgeMiddleWithR

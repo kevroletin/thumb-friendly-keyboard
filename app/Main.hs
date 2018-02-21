@@ -2,20 +2,21 @@ module Main where
 
 import           Control.Monad.State
 import           Data.Foldable
-import qualified Data.List              as List
+import qualified Data.List                       as List
 import           System.IO
 
-import           Scad
--- TODO: main shouldn't contain rendering logic, only configuration
-import           Config
 import           Data.Maybe
 import           Data.Monoid
-import           GeneralUtils
-import           Parts
-import           Scad
-import qualified Scad.Connectors.Sphere as Sp
-import           Scad.Sandwidge
-import           Transformation
+import           Keyboard.GeneralUtils
+import           Keyboard.Config
+import           Keyboard.Parts
+import           Keyboard.Scad
+import           Keyboard.Scad
+import qualified Keyboard.Scad.Connectors.Sphere as Sp
+import           Keyboard.Scad.Sandwidge
+import           Keyboard.Transformation
+
+-- TODO: main shouldn't contain rendering logic, only configuration
 
 -- TODO: several figures are actually figure + set of holes. Figures could
 -- intersect so we combine figures as the first step and only then remove holes.
