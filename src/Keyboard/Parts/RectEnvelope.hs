@@ -1,3 +1,10 @@
+-- | See "Keyboard.Parts.Envelope" to find out what envelope means.
+--
+-- This envelope is an extruded along z axis rectangle with side parallel to x
+-- and y axis. Additional \"negative\"(or hole) figure is added below envelope
+-- to ensure it's bottom surface is flat and doesn't merge with some other
+-- figures.
+
 module Keyboard.Parts.RectEnvelope (
   RectEnvelope(..)
   , rectEnvelopeSolid

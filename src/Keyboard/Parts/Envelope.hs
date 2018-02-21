@@ -1,7 +1,10 @@
-{-| Envelope is outer part of a plate. It contains no switches and it's only
-   purpose is a smooth transition from curly shape to something regular like a
-   parallelepiped.
--}
+-- | Envelope is outer part of a plate. It contains no switches and it's only
+-- purpose is a smooth transition from curly shape to something regular like a
+-- parallelepiped.
+--
+-- User defines shape of this envelope manually as a list of dots for each of 4
+-- sides.
+
 module Keyboard.Parts.Envelope (
   Envelope(..)
   , buildEnvelope

@@ -1,3 +1,6 @@
+-- | This picture describes how sockets are connected together:
+-- <<doc/img/socket_orientation.png VertexesOrientation>>
+
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
