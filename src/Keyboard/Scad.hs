@@ -1,5 +1,5 @@
 module Keyboard.Scad (
-  module Keyboard.Scad.Builders
+  module Keyboard.Scad.Primitives
   , Path
   , ScadProgram
   , Segment
@@ -8,10 +8,12 @@ module Keyboard.Scad (
   , renderToScad
   , Sandwidge(..)
   , Wall(..)
+  , hollowFigureToScad
 ) where
 
-import qualified Data.Glome.Vec          as V
-import           Keyboard.Scad.Builders
+import qualified Data.Glome.Vec             as V
+import           Keyboard.Scad.HollowFigure
 import           Keyboard.Scad.Internal
 import           Keyboard.Scad.Path
+import           Keyboard.Scad.Primitives
 import           Keyboard.Scad.Sandwidge

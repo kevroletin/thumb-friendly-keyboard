@@ -5,7 +5,7 @@ module Keyboard.Scad.Connectors.Surface (
 import qualified Data.Glome.Vec         as V
 import           Keyboard.GeneralUtils
 import           Keyboard.Scad
-import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Primitives
 import           Keyboard.Scad.Path
 import           Keyboard.Scad.Utils
 

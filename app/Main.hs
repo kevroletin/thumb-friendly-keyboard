@@ -2,17 +2,11 @@ module Main where
 
 import           Control.Monad.State
 import           Data.Foldable
-import qualified Data.List                       as List
+import qualified Data.List               as List
 import           Data.Maybe
 import           Data.Monoid
-import           Keyboard.Config
-import           Keyboard.GeneralUtils
-import           Keyboard.Parts
-import           Keyboard.Scad
-import           Keyboard.Scad
-import qualified Keyboard.Scad.Connectors.Sphere as Sp
-import           Keyboard.Scad.HollowFigure
-import           Keyboard.Scad.Sandwidge
+import           Demo.Body               (bodyDemo)
+import           Keyboard
 import           Keyboard.Transformation
 import           System.IO
 
@@ -28,7 +22,7 @@ buildFinalPart switches envelope rectEnvelope = hollowFigureToScad $
     compureRectCoords (x_len, y_len) = (computeRectEnvelopeAroundPlate switches x_len y_len 2.5)
 
 mainPlate :: [[Switch]]
-mainPlate = fmap (fmap $ transform (Translate $ vec 0 0 (-5))) [
+mainPlate = transform (Translate $ vec 0 0 (-5)) [
  [ switch (vec (0)    (-4) (6))  (vec (-30) (0) (0))
  , switch (vec (19.5) (-2) (6))  (vec (-30) (0) (0))
  , switch (vec (39)   (0)  (4))  (vec (-30) (0) (0))
@@ -98,37 +92,6 @@ writeFinalPartToFile ::
 writeFinalPartToFile (fileName, plate, envelope, rectEnvelope) =
   writeFigureToFile fileName (buildFinalPart plate envelope rectEnvelope)
 
--- TODO: main shouldn't contain rendering logic, only configuration
-bodyDemo :: ScadProgram
-bodyDemo = union [
-  plateSolid p1
-  , plateSolid p2
-  , keycaps p1
-  , keycaps p2
-
-  , Sp.connectPaths 2.5 (wallMiddle $ plateFrontWall p1)
-    (wallMiddle $ reverseWall $ plateBackWall p2 <> plateLeftWall p2)
-  , Sp.projectWallDown (plateLeftWall p1)
-  , Sp.projectWallDown (plateBackWall p1)
-  , Sp.projectWallDown (plateRightWall p2)
-  , Sp.projectWallDown (plateFrontWall p2)
-  , Sp.projectPathDown 2.5 [
-      (head $ wallMiddle (plateFrontWall p1))
-      , (last $ wallMiddle (plateLeftWall p2))
-      ]
-  ]
-  where
-    tr1 = transformBySeq [
-      Translate (vec 0 0 10)
-      , Rotate (vec 0 (-60) 0)
-      ]
-    tr2 = transformBySeq [
-      Translate (vec 45 (-45) 25)
-      , Rotate (vec 50 (-20) 0)
-      ]
-    p1 = (tr1 mainPlate)
-    p2 = (tr2 thumbPlate)
-
 main :: IO ()
 main = do
   mapM_ writeFinalPartToFile [
@@ -137,4 +100,4 @@ main = do
     , ("thumb_plate.scad", thumbPlate, Nothing, Just thumbRectEnvelope)
     , ("single_socket.scad", singleSocket, Nothing, Nothing)
     ]
-  writeFigureToFile "body_demo.scad" bodyDemo
+  writeFigureToFile "body_demo.scad" (bodyDemo mainPlate thumbPlate)

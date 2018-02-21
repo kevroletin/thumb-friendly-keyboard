@@ -9,7 +9,7 @@ module Keyboard.Parts.Switch (
 import qualified Data.Glome.Vec          as V
 import           Keyboard.Config
 import           Keyboard.Scad
-import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Primitives
 import           Keyboard.Transformation
 
 data Switch = Switch [Transformation] deriving Show;

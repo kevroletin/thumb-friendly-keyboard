@@ -7,7 +7,7 @@ module Keyboard.Scad.Utils (
 
 import qualified Data.Glome.Vec         as V
 import           Keyboard.GeneralUtils
-import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Primitives
 import           Keyboard.Scad.Internal
 
 dist :: V.Vec -> V.Vec -> V.Flt

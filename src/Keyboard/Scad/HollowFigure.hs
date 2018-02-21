@@ -5,7 +5,7 @@ module Keyboard.Scad.HollowFigure (
 
 import           Data.Maybe             (fromMaybe)
 import           Data.Semigroup
-import           Keyboard.Scad.Builders (difference, dummyFigure, union)
+import           Keyboard.Scad.Primitives (difference, dummyFigure, union)
 import           Keyboard.Scad.Internal (ScadProgram (..))
 
 data HollowFigure = HollowFigure {

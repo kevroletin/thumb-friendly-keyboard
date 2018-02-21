@@ -12,7 +12,7 @@ module Keyboard.Scad.Sandwidge (
 import qualified Data.Glome.Vec         as V
 import           Data.Monoid
 import           Keyboard.GeneralUtils
-import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Primitives
 import           Keyboard.Scad.Internal
 import           Keyboard.Scad.Path
 import           Keyboard.Scad.Utils

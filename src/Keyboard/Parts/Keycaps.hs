@@ -8,7 +8,7 @@ import           Keyboard.Config
 import           Keyboard.Parts.Plate       (Plate)
 import           Keyboard.Parts.Switch
 import           Keyboard.Scad
-import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Primitives
 import           Keyboard.Scad.HollowFigure
 import           Keyboard.Transformation
 

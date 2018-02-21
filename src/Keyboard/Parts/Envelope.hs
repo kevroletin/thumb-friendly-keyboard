@@ -16,7 +16,7 @@ import           Keyboard.Config
 import           Keyboard.Parts.Plate
 import           Keyboard.Parts.Switch
 import           Keyboard.Scad
-import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Primitives
 import           Keyboard.Scad.Sandwidge
 import           Keyboard.Transformation
 import           Keyboard.Scad.HollowFigure

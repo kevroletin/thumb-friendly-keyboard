@@ -1,10 +1,10 @@
-name:                3d
+name:                KeyboardGenerator
 version:             0.1.0.0
-github:              "githubuser/3d"
+github:              "kevroletin/thumb-friendly-keyboard"
 license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2018 Author name here"
+author:              "Vasiliy Kevroletin"
+maintainer:          "kevroletin@gmail.com"
+copyright:           "2018 Vasiliy K."
 
 extra-source-files:
 - README.md
@@ -15,24 +15,23 @@ extra-doc-files:
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
-# category:            Web
+# category:            not-intended-for-hackage-category
 
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on Github at <https://github.com/githubuser/3d#readme>
+description:         Please see the README on Github at <https://github.com/kevroletin/thumb-friendly-keyboard#readme>
 
 dependencies:
 - base >= 4.7 && < 5
 - GlomeVec
 - mtl
-- array
 
 library:
   source-dirs: src
 
 executables:
-  3d-exe:
+  main-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -40,7 +39,7 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - 3d
+    - KeyboardGenerator
 
 tests:
   3d-test:
@@ -51,4 +50,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - 3d
+    - KeyboardGenerator

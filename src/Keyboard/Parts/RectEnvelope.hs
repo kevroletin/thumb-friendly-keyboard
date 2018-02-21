@@ -11,7 +11,7 @@ import           Keyboard.Parts.Envelope
 import           Keyboard.Parts.Plate
 import           Keyboard.Parts.Switch
 import           Keyboard.Scad
-import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Primitives
 import qualified Keyboard.Scad.Connectors.Sphere as Sphere
 import           Keyboard.Scad.HollowFigure
 import           Keyboard.Scad.Sandwidge

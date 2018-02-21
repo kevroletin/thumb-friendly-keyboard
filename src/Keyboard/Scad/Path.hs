@@ -12,7 +12,7 @@ module Keyboard.Scad.Path (
 
 import qualified Data.Glome.Vec         as V
 import           Keyboard.GeneralUtils
-import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Primitives
 import           Keyboard.Scad.Utils
 
 type Path = [V.Vec]

@@ -13,7 +13,7 @@ module Keyboard.Scad.Connectors.Sphere (
 import qualified Data.Glome.Vec          as V
 import           Keyboard.GeneralUtils
 import           Keyboard.Scad
-import           Keyboard.Scad.Builders
+import           Keyboard.Scad.Primitives
 import           Keyboard.Scad.Path
 import           Keyboard.Scad.Sandwidge
 import           Keyboard.Scad.Utils
