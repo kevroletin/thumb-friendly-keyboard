@@ -1,7 +1,8 @@
 module Keyboard.Parts.RectEnvelope (
   RectEnvelope(..)
+  , rectEnvelopeSolid
+  , rectEnvelopeHole
   , buildRectEnvelope
-  , buildRectEnvelopeHole
   , computeRectEnvelopeAroundPlate
 ) where
 
@@ -12,6 +13,7 @@ import           Keyboard.Parts.Switch
 import           Keyboard.Scad
 import           Keyboard.Scad.Builders
 import qualified Keyboard.Scad.Connectors.Sphere as Sphere
+import           Keyboard.Scad.HollowFigure
 import           Keyboard.Scad.Sandwidge
 
 data RectEnvelope = RectEnvelope {
@@ -27,16 +29,16 @@ buildPart r wall a b = union $ [
   where
     cube' (V.Vec x y z) = translate x y z (cube0 (2*r) (2*r) (2*r))
 
-buildRectEnvelope :: Plate -> RectEnvelope -> ScadProgram
-buildRectEnvelope p (RectEnvelope lf lb rb rf r) = union $ [
+rectEnvelopeSolid :: Plate -> RectEnvelope -> ScadProgram
+rectEnvelopeSolid p (RectEnvelope lf lb rb rf r) = union $ [
   buildPart r (plateFrontWall p) lf rf
   , buildPart r (plateBackWall p) rb lb
   , buildPart r (plateLeftWall p) lb lf
   , buildPart r (plateRightWall p) rf rb
   ]
 
-buildRectEnvelopeHole :: RectEnvelope -> ScadProgram
-buildRectEnvelopeHole (RectEnvelope lf lb rb rf r) = union $ [
+rectEnvelopeHole :: RectEnvelope -> ScadProgram
+rectEnvelopeHole (RectEnvelope lf lb rb rf r) = union $ [
   part lf rf
   , part rb lb
   , part lb lf
@@ -45,6 +47,11 @@ buildRectEnvelopeHole (RectEnvelope lf lb rb rf r) = union $ [
   where
     part a b = hull ([cube' a, cube' b])
     cube' (V.Vec x y z) = translate x y (z - 2*r) (cube0 (2*r) (2*r) (2*r))
+
+buildRectEnvelope :: Plate -> RectEnvelope -> HollowFigure
+buildRectEnvelope plate rect =
+  HollowFigure (Just $ rectEnvelopeSolid plate rect)
+               (Just $ rectEnvelopeHole rect)
 
 computeRectEnvelopeAroundPlate :: Plate -> Double -> Double -> Double
   -> RectEnvelope

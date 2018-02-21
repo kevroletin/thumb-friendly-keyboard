@@ -2,8 +2,8 @@ module Keyboard.Parts.Switch (
   Switch(..)
   , switchVertexes
   , switch
-  , buildSwitchHole
-  , buildKeycapPadHole
+  , switchHole
+  , keycapPadHole
 ) where
 
 import qualified Data.Glome.Vec          as V
@@ -33,8 +33,8 @@ switchVertexes (Switch ts) =
     w  = switchSocketWidth / 2
     h  = switchHeight / 2
 
-buildSwitchHole :: Switch -> ScadProgram
-buildSwitchHole (Switch ts) = transformBySeq ts $ block [
+switchHole :: Switch -> ScadProgram
+switchHole (Switch ts) = transformBySeq ts $ block [
   cube' holeWidth holeWidth (switchHeight + 2) (-1)
   , cube' holeWidth (holeWidth + 2 * holeNotchWidth) switchHeight (-holeNotchHeight)
   ]
@@ -48,8 +48,8 @@ buildSwitchHole (Switch ts) = transformBySeq ts $ block [
 {-| This hole ensures that switch has clear space for keycap when key is pressed.
   (+ 0.0001) is a trick to preserve socket top surface in OpenScad preview
 -}
-buildKeycapPadHole :: Switch -> ScadProgram
-buildKeycapPadHole (Switch ts) = transformBySeq ts $
+keycapPadHole :: Switch -> ScadProgram
+keycapPadHole (Switch ts) = transformBySeq ts $
   translate 0 0 ((switchHeight + h)/2 + 0.0001) (cube0 switchSocketWidth switchSocketWidth h)
   where h = 4
 

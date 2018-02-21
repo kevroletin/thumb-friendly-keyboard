@@ -19,6 +19,7 @@ import           Keyboard.Scad
 import           Keyboard.Scad.Builders
 import           Keyboard.Scad.Sandwidge
 import           Keyboard.Transformation
+import           Keyboard.Scad.HollowFigure
 
 data Envelope = Envelope {
   left        :: [V.Vec],
@@ -79,10 +80,11 @@ envelopeRightWall e = Wall (right e) (translateEnvelopLine e $ right e)
 envelopeLeftWall :: Envelope -> Wall V.Vec
 envelopeLeftWall e = Wall (reverse $ left e) (reverse $ translateEnvelopLine e $ left e)
 
-buildEnvelope :: Plate -> Envelope -> ScadProgram
-buildEnvelope p e = union [
-  buildEnvelopePart (plateFrontWall p) (envelopeFrontWall e)
-  , buildEnvelopePart (plateBackWall p) (envelopeBackWall e)
-  , buildEnvelopePart (plateRightWall p) (envelopeRightWall e)
-  , buildEnvelopePart (plateLeftWall p) (envelopeLeftWall e)
-  ]
+buildEnvelope :: Plate -> Envelope -> HollowFigure
+buildEnvelope p e = HollowFigure (Just res) Nothing
+  where res = union [
+          buildEnvelopePart (plateFrontWall p) (envelopeFrontWall e)
+          , buildEnvelopePart (plateBackWall p) (envelopeBackWall e)
+          , buildEnvelopePart (plateRightWall p) (envelopeRightWall e)
+          , buildEnvelopePart (plateLeftWall p) (envelopeLeftWall e)
+          ]

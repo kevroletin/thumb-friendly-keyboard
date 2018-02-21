@@ -37,10 +37,18 @@
 --
 -- Implementation of this module uses several naming conventions.
 --
---     * build* functions produce scad programs
+--     * build* functions produce HollowFigures /(which are figures together
+--       with parts what should be removed)/
 --     * we assume next view location /(this is default view location in OpenScad)/:
 --
 --         * x goes from left to right
 --         * y goes from "front" to "back"
 
-module Keyboard where
+module Keyboard (
+  module Keyboard.Parts
+  , module Keyboard.Scad
+) where
+
+import Keyboard.Parts
+import Keyboard.Scad
+import Keyboard.Config

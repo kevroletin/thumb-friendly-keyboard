@@ -3,40 +3,28 @@ module Main where
 import           Control.Monad.State
 import           Data.Foldable
 import qualified Data.List                       as List
-import           System.IO
-
 import           Data.Maybe
 import           Data.Monoid
-import           Keyboard.GeneralUtils
 import           Keyboard.Config
+import           Keyboard.GeneralUtils
 import           Keyboard.Parts
 import           Keyboard.Scad
 import           Keyboard.Scad
 import qualified Keyboard.Scad.Connectors.Sphere as Sp
+import           Keyboard.Scad.HollowFigure
 import           Keyboard.Scad.Sandwidge
 import           Keyboard.Transformation
+import           System.IO
 
--- TODO: main shouldn't contain rendering logic, only configuration
-
--- TODO: several figures are actually figure + set of holes. Figures could
--- intersect so we combine figures as the first step and only then remove holes.
--- This could be factored out into something like a Monoid: we combine figures
--- with holes and then render them.
 buildFinalPart :: [[Switch]] -> Maybe Envelope -> Maybe (Double, Double)
                -> ScadProgram
-buildFinalPart switches envelope rectEnvelope =
-  difference [
-    union [
-        buildPlate switches
-        , buildKeycaps switches
-        , maybeFigure (buildEnvelope switches <$> envelope)
-        , maybeFigure (buildRectEnvelope switches . compureRectCoords <$> rectEnvelope)
-        ]
-    , buildPlateHoles switches
-    , maybeFigure (buildRectEnvelopeHole . compureRectCoords <$> rectEnvelope)
-    ]
+buildFinalPart switches envelope rectEnvelope = hollowFigureToScad $
+  buildPlate switches
+  <> buildKeycaps switches
+  <> maybeFigure (buildEnvelope switches <$> envelope)
+  <> maybeFigure (buildRectEnvelope switches . compureRectCoords <$> rectEnvelope)
   where
-    maybeFigure = fromMaybe dummyFigure
+    maybeFigure = fromMaybe mempty
     compureRectCoords (x_len, y_len) = (computeRectEnvelopeAroundPlate switches x_len y_len 2.5)
 
 mainPlate :: [[Switch]]
@@ -110,13 +98,13 @@ writeFinalPartToFile ::
 writeFinalPartToFile (fileName, plate, envelope, rectEnvelope) =
   writeFigureToFile fileName (buildFinalPart plate envelope rectEnvelope)
 
-
+-- TODO: main shouldn't contain rendering logic, only configuration
 bodyDemo :: ScadProgram
 bodyDemo = union [
-  buildPlate p1
-  , buildPlate p2
-  , buildKeycaps p1
-  , buildKeycaps p2
+  plateSolid p1
+  , plateSolid p2
+  , keycaps p1
+  , keycaps p2
 
   , Sp.connectPaths 2.5 (wallMiddle $ plateFrontWall p1)
     (wallMiddle $ reverseWall $ plateBackWall p2 <> plateLeftWall p2)

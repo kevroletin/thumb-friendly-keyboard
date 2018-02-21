@@ -1,7 +1,3 @@
-{-|-- We assume next view location:
-   -- + x goes from left to right
-   -- + y goes from "near" to "far"
--}
 module Keyboard.Scad (
   module Keyboard.Scad.Builders
   , Path

@@ -5,24 +5,25 @@ module Keyboard.Parts.Plate (
   Plate
   , Rect(..)
   , plateBoundingRect
+  , plateSolid
+  , plateHoles
   , buildPlate
-  , buildPlateHoles
   , plateFrontWall
   , plateBackWall
   , plateRightWall
   , plateLeftWall
   , platePerimeter
 ) where
-
 import           Data.Foldable
-import qualified Data.Glome.Vec          as V
-import qualified Data.List               as List
+import qualified Data.Glome.Vec             as V
+import qualified Data.List                  as List
 import           Data.Monoid
 import           Keyboard.Config
 import           Keyboard.GeneralUtils
 import           Keyboard.Parts.Switch
 import           Keyboard.Scad
 import           Keyboard.Scad.Builders
+import           Keyboard.Scad.HollowFigure
 import           Keyboard.Scad.Sandwidge
 import           Keyboard.Transformation
 
@@ -100,8 +101,8 @@ addLeftWall sockets = addWall 0 1 (map head sockets) reverse
 addRightWall :: [[SocketBar]] -> PolyhedronMonad ()
 addRightWall sockets = addWall 3 2 (map last sockets) id
 
-buildPlateBody :: [[Switch]] -> ScadProgram
-buildPlateBody switches = buildPolyhedron $ do
+plateSolid :: [[Switch]] -> ScadProgram
+plateSolid switches = buildPolyhedron $ do
   sockets <- addSwitches switches
   for_ (concat sockets) addTopBottomSurf
   for_ sockets $ \line ->
@@ -122,13 +123,12 @@ buildPlateBody switches = buildPolyhedron $ do
 topToBottom :: Int -> Int
 topToBottom = (+ 4)
 
-buildPlateHoles :: Plate -> ScadProgram
-buildPlateHoles switches = union (map buildSwitchHole (concat switches)
-                                  ++ map buildKeycapPadHole (concat switches))
+plateHoles :: Plate -> ScadProgram
+plateHoles switches = union (map switchHole (concat switches)
+                              ++ map keycapPadHole (concat switches))
 
-buildPlate :: Plate -> ScadProgram
-buildPlate switches = difference [ buildPlateBody switches
-                                 , buildPlateHoles switches]
+buildPlate :: Plate -> HollowFigure
+buildPlate p = HollowFigure (Just $ plateSolid p) (Just $ plateHoles p)
 
 -- TODO: this functions are similar to add* functions used
 -- with polyhedron monad. Refactor to use same logic.
